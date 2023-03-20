@@ -130,3 +130,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+FamilyShop/settings.py
+
