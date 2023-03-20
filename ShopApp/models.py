@@ -1,8 +1,8 @@
 from django.core.validators import MinValueValidator
 from django.db import models
+import uuid
 
-####
-###########################
+
 class Promotion(models.Model):
     description = models.CharField(max_length=255)
     discount = models.FloatField()
@@ -21,6 +21,7 @@ class Collection(models.Model):
 
 
 class Product(models.Model):
+    id=models.UUIDField(default=uuid.uuid4,unique=True,editable=False,primary_key=True)
     title = models.CharField(max_length=255)
     slug = models.SlugField()
     description = models.TextField(null=True, blank=True)
