@@ -1,8 +1,9 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
-from .models import OrderItem, Product, Collection
-from .serializers import ProductSerializer, CollectionSerializer
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.mixins import CreateModelMixin
+from .models import OrderItem, Product, Collection, Cart
+from .serializers import ProductSerializer, CollectionSerializer, CartSerializer
 from django.db.models import Count
 
 
@@ -35,3 +36,8 @@ class CollectionViewSet(ModelViewSet):
             return Response({'error': 'Collection cannot be deleted because it contains products'},status=405)
         return super().destroy(request, *args, **kwargs)  
  
+
+class CartViewSet(CreateModelMixin, GenericViewSet):
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
+    

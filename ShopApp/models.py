@@ -21,7 +21,6 @@ class Collection(models.Model):
 
 
 class Product(models.Model):
-    id = models.UUIDField(default=uuid4, unique=True,editable=False,primary_key=True)
     title = models.CharField(max_length=255)
     slug = models.SlugField()
     description = models.TextField(null=True, blank=True)
