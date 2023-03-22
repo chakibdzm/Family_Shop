@@ -78,11 +78,8 @@ WSGI_APPLICATION = 'FamilyShop.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'family_shop',
-        'HOST': 'localhost',
-        'USER': 'sadek',
-        'PASSWORD': 'sadekmaachou2003.'
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
