@@ -53,7 +53,7 @@ class User(models.Model):
    # MEMBERSHIP_BRONZE = 'B'
     #MEMBERSHIP_SILVER = 'S'
     #MEMBERSHIP_GOLD = 'G'
-
+    
     #MEMBERSHIP_CHOICES = [
     #    (MEMBERSHIP_BRONZE, 'Bronze'),
      #   (MEMBERSHIP_SILVER, 'Silver'),
