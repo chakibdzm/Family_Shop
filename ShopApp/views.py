@@ -14,6 +14,7 @@ class ProductViewSet(ModelViewSet):
     filter_backends=(DjangoFilterBackend,SearchFilter)
     filterset_fields=['collection']
     search_fields=['tags','title']
+    #
     
     
     def get_serializer_context(self):
