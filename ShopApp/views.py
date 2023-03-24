@@ -7,7 +7,7 @@ from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 
-
+#
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.select_related('collection').all()
     serializer_class = ProductSerializer

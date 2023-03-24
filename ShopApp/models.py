@@ -19,7 +19,7 @@ class Collection(models.Model):
     class Meta:
         ordering = ['title']
 
-
+#
 class Product(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField()
