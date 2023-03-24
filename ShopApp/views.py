@@ -4,11 +4,17 @@ from rest_framework.viewsets import ModelViewSet
 from .models import OrderItem, Product, Collection, Cart, CartItem
 from .serializers import ProductSerializer, CollectionSerializer, CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer
 from django.db.models import Count
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 
 
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.select_related('collection').all()
     serializer_class = ProductSerializer
+    filter_backends=(DjangoFilterBackend,SearchFilter)
+    filterset_fields=['collection']
+    search_fields=['tags']
+    
     
     def get_serializer_context(self):
         return {'request': self.request}
