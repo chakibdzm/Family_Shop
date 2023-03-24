@@ -1,13 +1,13 @@
 from django.core.validators import MinValueValidator
 from django.db import models
+from uuid import uuid4
 
-
-
+#
 class Promotion(models.Model):
     description = models.CharField(max_length=255)
     discount = models.FloatField()
 
-
+#
 class Collection(models.Model):
     title = models.CharField(max_length=255)
     featured_product = models.ForeignKey(
@@ -19,10 +19,11 @@ class Collection(models.Model):
     class Meta:
         ordering = ['title']
 
-
+#
 class Product(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField()
+    tags=models.TextField(null=True,blank=True)
     description = models.TextField(null=True, blank=True)
     unit_price = models.DecimalField(
         max_digits=6,
@@ -32,6 +33,7 @@ class Product(models.Model):
     last_update = models.DateTimeField(auto_now=True)
     collection = models.ForeignKey(Collection, on_delete=models.PROTECT, related_name='products')
     promotions = models.ManyToManyField(Promotion, blank=True)
+    
 
     def __str__(self) -> str:
         return self.title
@@ -96,10 +98,17 @@ class Address(models.Model):
 
 
 class Cart(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
 class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveSmallIntegerField()
+    quantity = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1)]
+    )
+
+
+    class Meta:
+        unique_together = [['cart', 'product']]
