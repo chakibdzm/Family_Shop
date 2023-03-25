@@ -1,8 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from .models import OrderItem, Product, Collection, Cart, CartItem
-from .serializers import ProductSerializer, CollectionSerializer, CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer
+from .models import OrderItem, Product, Collection, Cart, CartItem, Customer
+from .serializers import ProductSerializer, CollectionSerializer, CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, CustomerSerializer
 from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
@@ -49,6 +49,15 @@ class CartViewSet(ModelViewSet):
 
     def get_serializer_context(self):
         return {'request': self.request}
+    
+    
+class CustomerViewSet(ModelViewSet):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+
+    def get_serializer_context(self):
+        return {'request': self.request}
+    
     
 class CartItemViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
