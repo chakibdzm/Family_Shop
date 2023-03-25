@@ -4,10 +4,11 @@ from uuid import uuid4
 
 #
 class Promotion(models.Model):
-    description = models.CharField(max_length=255)
-    discount = models.FloatField()
+    description = models.CharField(max_length=255,null=True)
+    discount = models.FloatField() #poucentage 
+    date_start = models.DateField()
+    date_end = models.DateField()
 
-#
 class Collection(models.Model):
     title = models.CharField(max_length=255)
     featured_product = models.ForeignKey(
@@ -23,7 +24,7 @@ class Collection(models.Model):
 class Product(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField()
-    tags=models.TextField(null=True,blank=True)
+    tags = models.TextField(null=True,blank=True)
     description = models.TextField(null=True, blank=True)
     unit_price = models.DecimalField(
         max_digits=6,
@@ -40,6 +41,13 @@ class Product(models.Model):
 
     class Meta:
         ordering = ['title']
+
+class Product_variation(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    description = models.TextField(max_length=255)
+    image = models.ImageField()
+    price = models.DecimalField(null=True)
 
 
 class Customer(models.Model):
@@ -85,16 +93,31 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.PROTECT)
-    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='orderitems')
+    Product_variation = models.ManyToManyField(Product_variation,null=True)
     quantity = models.PositiveSmallIntegerField()
     unit_price = models.DecimalField(max_digits=6, decimal_places=2)
 
 
 class Address(models.Model):
-    street = models.CharField(max_length=255)
-    city = models.CharField(max_length=255)
-    customer = models.ForeignKey(
-        Customer, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer,on_delete=models.CASCADE)
+    address = models.TextField(max_length=255)
+    town = models.CharField()
+    rue = models.CharField()
+    postal_code = models.IntegerField(max_length=5)
+
+class shipping(models.Model):
+    shipping_methodes = [
+        ('Poste', 'Poste'),
+        ('Yalidine', 'Yalidinr')
+    ]
+    customer = models.OneToOneField(Customer,on_delete=models.CASCADE)
+    shipping_address = models.ForeignKey(Address,on_delete=models.CASCADE)
+    shipping_method = models.CharField(choices=shipping_methodes)
+    shipping_cost = models.DecimalField(max_digits=10,decimal_places=2,null=True)
+    shipping_date = models.DateField(auto_now_add=True)
+    order = models.ForeignKey(Order,null=True,on_delete=models.CASCADE)
+    def __str__(self):
+        return "%s " % (self.user_name)
 
 
 class Cart(models.Model):
@@ -112,3 +135,39 @@ class CartItem(models.Model):
 
     class Meta:
         unique_together = [['cart', 'product']]
+
+class payement(models.Model):
+    payment_methodes = [
+        ('carte edahabia', 'carte edahabia'),
+        ('cash on delivery', 'cash on delivery')
+    ]
+    order = models.ForeignKey(Order,null=True,on_delete=models.CASCADE)
+    payment_methode = models.CharField(choices=payment_methodes)
+    payment_date = models.DateField(auto_now_add=True)
+    payment_cost = models.DecimalField(max_digits=10,decimal_places=2,null=True)
+
+class review(models.Model):
+    customer = models.ForeignKey(Customer,on_delete=models.CASCADE,null=True)
+    review_date = models.DateField(auto_now_add=True)
+    comment = models.TextField(max_length=255)
+    product = models.ForeignKey(Product,on_delete=models.CASCADE, null=True)
+    rating = models.IntegerField(max_length=5)  #5 stars haka
+
+class favList(models.Model):
+    customer = models.OneToOneField(Customer,on_delete=models.CASCADE,null=True)
+    items = models.ForeignKey(Product,on_delete=models.CASCADE,null=True)
+    created_date = models.DateField(auto_now_add=True)
+
+class club(models.Model):
+    name = models.CharField(max_length=255)
+    discount_percentage = models.IntegerField()
+    level = models.CharField() 
+    #well hna the idea of club is not clear
+
+class club_member(models.Model):
+    customer = models.OneToOneField(Customer,on_delete=models.CASCADE)
+    club = models.ForeignKey(club,on_delete=models.CASCADE)
+    join_date = models.DateField()
+    expiry_date = models.DateField()
+    def __str__(self):
+        return "%s" % (self.user.user_name)
