@@ -47,7 +47,7 @@ class Product_variation(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(max_length=255)
     image = models.ImageField()
-    price = models.DecimalField(null=True)
+    price = models.DecimalField(null=True, decimal_places=2, max_digits=100)
 
 
 class Customer(models.Model):
@@ -93,26 +93,25 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.PROTECT)
-    Product_variation = models.ManyToManyField(Product_variation,null=True)
+    Product_variation = models.ManyToManyField(Product_variation)
     quantity = models.PositiveSmallIntegerField()
     unit_price = models.DecimalField(max_digits=6, decimal_places=2)
 
 
 class Address(models.Model):
     customer = models.ForeignKey(Customer,on_delete=models.CASCADE)
-    address = models.TextField(max_length=255)
-    town = models.CharField()
-    rue = models.CharField()
-    postal_code = models.IntegerField(max_length=5)
+    city = models.CharField(max_length=255)
+    street = models.CharField(max_length=255)
+    postal_code = models.CharField(max_length=5)
 
 class shipping(models.Model):
     shipping_methodes = [
         ('Poste', 'Poste'),
-        ('Yalidine', 'Yalidinr')
+        ('Yalidine', 'Yalidine')
     ]
     customer = models.OneToOneField(Customer,on_delete=models.CASCADE)
     shipping_address = models.ForeignKey(Address,on_delete=models.CASCADE)
-    shipping_method = models.CharField(choices=shipping_methodes)
+    shipping_method = models.CharField(choices=shipping_methodes, max_length=255)
     shipping_cost = models.DecimalField(max_digits=10,decimal_places=2,null=True)
     shipping_date = models.DateField(auto_now_add=True)
     order = models.ForeignKey(Order,null=True,on_delete=models.CASCADE)
@@ -142,7 +141,7 @@ class payement(models.Model):
         ('cash on delivery', 'cash on delivery')
     ]
     order = models.ForeignKey(Order,null=True,on_delete=models.CASCADE)
-    payment_methode = models.CharField(choices=payment_methodes)
+    payment_methode = models.CharField(choices=payment_methodes, max_length=255)
     payment_date = models.DateField(auto_now_add=True)
     payment_cost = models.DecimalField(max_digits=10,decimal_places=2,null=True)
 
@@ -151,7 +150,7 @@ class review(models.Model):
     review_date = models.DateField(auto_now_add=True)
     comment = models.TextField(max_length=255)
     product = models.ForeignKey(Product,on_delete=models.CASCADE, null=True)
-    rating = models.IntegerField(max_length=5)  #5 stars haka
+    rating = models.CharField(max_length=5)  #5 stars haka
 
 class favList(models.Model):
     customer = models.OneToOneField(Customer,on_delete=models.CASCADE,null=True)
@@ -161,7 +160,7 @@ class favList(models.Model):
 class club(models.Model):
     name = models.CharField(max_length=255)
     discount_percentage = models.IntegerField()
-    level = models.CharField() 
+    level = models.CharField(max_length=255) 
     #well hna the idea of club is not clear
 
 class club_member(models.Model):
