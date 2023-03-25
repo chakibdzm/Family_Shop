@@ -4,9 +4,10 @@ from uuid import uuid4
 
 
 class Promotion(models.Model):
-    description = models.CharField(max_length=255)
-    discount = models.FloatField()
-
+    description = models.CharField(max_length=255,null=True)
+    discount = models.FloatField() #poucentage 
+    date_start = models.DateField()
+    date_end = models.DateField()
 
 class Collection(models.Model):
     title = models.CharField(max_length=255)
@@ -23,7 +24,7 @@ class Collection(models.Model):
 class Product(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField()
-    tags=models.TextField(null=True,blank=True)
+    tags = models.TextField(null=True,blank=True)
     description = models.TextField(null=True, blank=True)
     unit_price = models.DecimalField(
         max_digits=6,
@@ -105,9 +106,13 @@ class Address(models.Model):
     postal_code = models.IntegerField(max_length=5)
 
 class shipping(models.Model):
+    shipping_methodes = [
+        ('Poste', 'Poste'),
+        ('Yalidine', 'Yalidinr')
+    ]
     customer = models.OneToOneField(Customer,on_delete=models.CASCADE)
     shipping_address = models.ForeignKey(Address,on_delete=models.CASCADE)
-    shipping_method = models.CharField(max_length=255)
+    shipping_method = models.CharField(choices=shipping_methodes)
     shipping_cost = models.DecimalField(max_digits=10,decimal_places=2,null=True)
     shipping_date = models.DateField(auto_now_add=True)
     order = models.ForeignKey(Order,null=True,on_delete=models.CASCADE)
@@ -132,8 +137,12 @@ class CartItem(models.Model):
         unique_together = [['cart', 'product']]
 
 class payement(models.Model):
+    payment_methodes = [
+        ('carte edahabia', 'carte edahabia'),
+        ('cash on delivery', 'cash on delivery')
+    ]
     order = models.ForeignKey(Order,null=True,on_delete=models.CASCADE)
-    payment_methode = models.CharField()
+    payment_methode = models.CharField(choices=payment_methodes)
     payment_date = models.DateField(auto_now_add=True)
     payment_cost = models.DecimalField(max_digits=10,decimal_places=2,null=True)
 
