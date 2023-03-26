@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     'djoser',
     'ShopApp',
     'core',
+   
 ]
 
 MIDDLEWARE = [
@@ -134,7 +136,11 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-   'AUTH_HEADER_TYPES': ('JWT',),
+    'AUTH_HEADER_TYPES': ('JWT',),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    
+    
 }
 
 
@@ -149,6 +155,8 @@ AUTH_USER_MODEL = 'core.User'
 
 DJOSER = {
     'SERIALIZERS': {
-        'user_create': 'core.serializers.UserCreateSerializer'
+        'user_create': 'core.serializers.UserCreateSerializer',
+        'current_user': 'core.serializers.UserSerializer'
     }
 }
+
