@@ -34,7 +34,6 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'jazzmin',
-    'admin_volt.apps.AdminVoltConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -85,11 +84,8 @@ WSGI_APPLICATION = 'FamilyShop.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'family',
-        'HOST':'localhost',
-        'USER':'root',
-        'PASSWORD':'chakibdzm26'
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
