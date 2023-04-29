@@ -1,16 +1,16 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
-from .models import OrderItem, Product, Collection, Cart, CartItem, Customer
-from .serializers import ProductSerializer, CollectionSerializer, CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, CustomerSerializer
+from rest_framework.viewsets import ModelViewSet,GenericViewSet
+from .models import *
+from .serializers import *
 from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
-from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import CreateModelMixin,RetrieveModelMixin,UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated,AllowAny,IsAdminUser
 from .permissions import IsAdminOrReadOnly
+from rest_framework import status
 #
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.select_related('collection').all()
@@ -83,6 +83,7 @@ class CartItemViewSet(ModelViewSet):
     def get_serializer_context(self):
         return {'cart_id': self.kwargs['cart_pk']}
 
+    #@action(detail=False,methods=['POST','PATCH'],permission_classes=[IsAuthenticated])
     def get_serializer_class(self):
         if self.request.method == "POST":
             return AddCartItemSerializer
@@ -93,3 +94,49 @@ class CartItemViewSet(ModelViewSet):
     def get_queryset(self):
         return CartItem.objects.filter(cart_id=self.kwargs['cart_pk'])
     
+ 
+class ReviewViewSet(ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ReviewSerializer
+
+    def create(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.user != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user)
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.user != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.user != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+ 
+
+class FavoriteViewSet(ModelViewSet):
+   # permission_classes = [IsAuthenticated] || user can add to fav without acc
+    serializer_class = FavListSerializer
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return AddFavSerializer
+        return FavListSerializer
+    
+    def destroy(self, request, *args, **kwargs):
+        product_id = kwargs.get('pk')
+        product = get_object_or_404(Product, id=product_id)
+        favorite = get_object_or_404(favList, user=request.user, product=product)
+        favorite.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

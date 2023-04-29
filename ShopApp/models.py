@@ -43,12 +43,11 @@ class Product(models.Model):
     class Meta:
         ordering = ['title']
 
-class Product_variation(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    description = models.TextField(max_length=255)
+class Product_variation(Product):
     image = models.ImageField()
-    price = models.DecimalField(null=True, decimal_places=2, max_digits=100)
+    color = models.TextField(null=True,blank=True)
+    size = models.TextField(null=True,blank=True)
+    #material = models.CharField(max_length=50)
 
 
 class Customer(models.Model):
@@ -146,15 +145,16 @@ class payement(models.Model):
 
 class review(models.Model):
     customer = models.ForeignKey(Customer,on_delete=models.CASCADE,null=True)
-    review_date = models.DateField(auto_now_add=True)
+    created_at = models.DateField(auto_now_add=True)
     comment = models.TextField(max_length=255)
     product = models.ForeignKey(Product,on_delete=models.CASCADE, null=True)
-    rating = models.CharField(max_length=5)  #5 stars haka
+    rating = models.IntegerField(max_length=5)  #5 stars haka
+    updated_at = models.DateTimeField(auto_now=True)
 
 class favList(models.Model):
     customer = models.OneToOneField(Customer,on_delete=models.CASCADE,null=True)
-    items = models.ForeignKey(Product,on_delete=models.CASCADE,null=True)
-    created_date = models.DateField(auto_now_add=True)
+    product = models.ForeignKey(Product,on_delete=models.CASCADE,null=True)
+    created_at = models.DateField(auto_now_add=True)
 
 class club(models.Model):
     name = models.CharField(max_length=255)
