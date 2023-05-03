@@ -12,15 +12,17 @@ class Promotion(models.Model):
 
 class Collection(models.Model):
     title = models.CharField(max_length=255)
-    featured_product = models.ForeignKey(
-        'Product', on_delete=models.SET_NULL, null=True, related_name='+', blank=True)
-
     def __str__(self) -> str:
         return self.title
-
     class Meta:
         ordering = ['title']
 
+class Sub_collection(models.Model):
+    title=models.CharField(max_length=255)
+    parent_collection=models.ForeignKey(Collection, on_delete=models.CASCADE, related_name='subcollections')
+   
+    def __str__(self) ->str:
+        return self.title
 #
 class Product(models.Model):
     title = models.CharField(max_length=255)
@@ -33,17 +35,30 @@ class Product(models.Model):
         validators=[MinValueValidator(1)])
     inventory = models.IntegerField(validators=[MinValueValidator(0)])
     last_update = models.DateTimeField(auto_now=True)
-    collection = models.ForeignKey(Collection, on_delete=models.PROTECT, related_name='products')
+    collection = models.ForeignKey(Sub_collection, on_delete=models.CASCADE, related_name='products')
     promotions = models.ManyToManyField(Promotion, blank=True)
     
 
     def __str__(self) -> str:
         return self.title
+    
+   
 
     class Meta:
         ordering = ['title']
 
+
+class Clothes(Product):
+    GENDER_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('K', 'Kids'),
+    )
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+
+
 class Product_variation(Product):
+
     image = models.ImageField()
     color = models.TextField(null=True,blank=True)
     size = models.TextField(null=True,blank=True)
