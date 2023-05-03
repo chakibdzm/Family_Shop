@@ -1,23 +1,82 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
-from .models import OrderItem, Product, Collection, Cart, CartItem, Customer
-from .serializers import ProductSerializer, CollectionSerializer, CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, CustomerSerializer
+from rest_framework.viewsets import ModelViewSet,GenericViewSet
+from .models import *
+from .serializers import *
 from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter
-from rest_framework.decorators import action
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.filters import SearchFilter,OrderingFilter
+from rest_framework.decorators import action,api_view
 from rest_framework.mixins import CreateModelMixin,RetrieveModelMixin,UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated,AllowAny,IsAdminUser
 from .permissions import IsAdminOrReadOnly
+from rest_framework.views import APIView
+from rest_framework import status,generics
+
+
+
+
 #
+@api_view(['GET'])
+def product_by_category(request, collection_id):
+    products = Product.objects.filter(collection_id=collection_id)
+    serializer = ProductSerializer(products, many=True)
+    return Response(serializer.data)
+
+
+
+class ClothesDetail(APIView):
+    def get(self, request, gender_title):
+        try:
+            product = Clothes.objects.get(gender=gender_title)
+        except Clothes.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = ClothesSerializer(product)
+        return Response(serializer.data)
+
+
+
+
+class ProductDetail(APIView):
+    def get(self, request, product_id):
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = ProductSerializer(product)
+        return Response(serializer.data)
+    
+class ClothesViewSet(ModelViewSet):
+    queryset=Clothes.objects.all()
+    serializer_class=ClothesSerializer
+    filter_backends=(DjangoFilterBackend,SearchFilter,OrderingFilter)
+    filterset_fields=['gender']
+    
+
+    def get_serializer_context(self):
+        return {'request': self.request}
+
+class CategoryDetail(APIView):
+    def get(self, request,category_id):
+        try:
+            category= Collection.objects.get(id=Collection.featured_product)
+        except Product.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = CollectionSerializer(category)
+        return Response(serializer.data)
+    
+
+
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.select_related('collection').all()
     serializer_class = ProductSerializer
-    filter_backends=(DjangoFilterBackend,SearchFilter)
+    filter_backends=(DjangoFilterBackend,SearchFilter,OrderingFilter)
     filterset_fields=['collection']
     search_fields=['tags','title']
+    OrderingFilter=['price_with_tax']
     permission_classes=[IsAdminOrReadOnly]
     #
     #
@@ -32,7 +91,7 @@ class ProductViewSet(ModelViewSet):
 
 
 class CollectionViewSet(ModelViewSet):
-    queryset = Collection.objects.annotate(products_count=Count('products'))
+    queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
     permission_classes=[IsAdminOrReadOnly]
 
@@ -93,3 +152,4 @@ class CartItemViewSet(ModelViewSet):
     def get_queryset(self):
         return CartItem.objects.filter(cart_id=self.kwargs['cart_pk'])
     
+
