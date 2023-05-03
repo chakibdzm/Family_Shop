@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'djoser',
     'ShopApp',
     'core',
+    'drf_yasg'
    
 ]
 

@@ -158,6 +158,7 @@ class CartItemViewSet(ModelViewSet):
     
  
 class ReviewViewSet(ModelViewSet):
+    queryset = review.objects.all()
     permission_classes = [IsAuthenticated]
     serializer_class = ReviewSerializer
 
@@ -190,6 +191,7 @@ class ReviewViewSet(ModelViewSet):
 class FavoriteViewSet(ModelViewSet):
    # permission_classes = [IsAuthenticated] || user can add to fav without acc
     serializer_class = FavListSerializer
+    queryset = favList.objects.all()
 
     def get_serializer_class(self):
         if self.request.method == "POST":
