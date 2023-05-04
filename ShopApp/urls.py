@@ -22,6 +22,7 @@ urlpatterns = router.urls+carts_router.urls+[
     path('products/<int:product_id>',views.ProductDetail.as_view()),
     path('products/collection/<int:collection_id>/', product_by_category),
     path('favorites/remove/<int:product_id>/', views.FavoriteViewSet.as_view({'delete': 'destroy'})),
+    path('favorites/add/<int:product_id>/', views.FavoriteViewSet.as_view({'post': 'create'})),
     path('reviews/add/<int:product_id>/', views.ReviewViewSet.as_view({'post': 'create'})),
     path('reviews/update/<int:product_id>/', views.ReviewViewSet.as_view({'patch': 'update'})),
     path('reviews/remove/<int:product_id>/', views.ReviewViewSet.as_view({'delete': 'destroy'})),

@@ -198,6 +198,10 @@ class FavoriteViewSet(ModelViewSet):
             return AddFavSerializer
         return FavListSerializer
     
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer_class()
+        return Response(serializer.data)
+
     def destroy(self, request, *args, **kwargs):
         product_id = kwargs.get('pk')
         product = get_object_or_404(Product, id=product_id)
