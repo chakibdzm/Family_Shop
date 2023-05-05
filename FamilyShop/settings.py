@@ -160,7 +160,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'core.User'
 
-ALLOWED_HOST = ["*"]
+ALLOWED_HOSTS = ["*"]
 
 DJOSER = {
     'SERIALIZERS': {
