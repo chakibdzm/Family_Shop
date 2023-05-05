@@ -29,9 +29,6 @@ def product_collection(request, category_name):
     return Response(serializer.data)
 
 
-
-
-
 class ClotheViewSet(ModelViewSet):
     queryset = Clothes.objects.all()
     serializer_class = ClothesSerializer
@@ -193,6 +190,12 @@ class CartItemViewSet(ModelViewSet):
        # self.perform_update(serializer)
        # return Response(serializer.data)
  
+
+class TestViewSet(ModelViewSet):
+    serializer_class=ProductSerializer
+    queryset=Product.objects.all()
+
+
 
 class FavoriteViewSet(ModelViewSet):
    # permission_classes = [IsAuthenticated] || user can add to fav without acc
