@@ -20,6 +20,11 @@ class Collection(models.Model):
 class Sub_collection(models.Model):
     title=models.CharField(max_length=255)
     parent_collection=models.ForeignKey(Collection, on_delete=models.CASCADE, related_name='subcollections')
+    
+
+    
+    
+
    
     def __str__(self) ->str:
         return self.title
@@ -42,6 +47,9 @@ class Product(models.Model):
     def __str__(self) -> str:
         return self.title
     
+    def get_collection_name(self):
+        return self.collection.title
+    
    
 
     class Meta:
@@ -56,6 +64,9 @@ class Clothes(Product):
     )
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
 
+    def get_collection_name(self):
+        return self.collection.title
+    
 
 class Product_variation(Product):
 
@@ -158,13 +169,13 @@ class payement(models.Model):
     payment_date = models.DateField(auto_now_add=True)
     payment_cost = models.DecimalField(max_digits=10,decimal_places=2,null=True)
 
-class review(models.Model):
-    customer = models.ForeignKey(Customer,on_delete=models.CASCADE,null=True)
-    created_at = models.DateField(auto_now_add=True)
-    comment = models.TextField(max_length=255)
-    product = models.ForeignKey(Product,on_delete=models.CASCADE, null=True)
-    rating = models.IntegerField(max_length=5)  #5 stars haka
-    updated_at = models.DateTimeField(auto_now=True)
+#class review(models.Model):
+   # customer = models.ForeignKey(Customer,on_delete=models.CASCADE,null=True)
+    #created_at = models.DateField(auto_now_add=True)
+    #comment = models.TextField(max_length=255)
+    #product = models.ForeignKey(Product,on_delete=models.CASCADE, null=True)
+    #rating = models.IntegerField()  #5 stars haka
+    #updated_at = models.DateTimeField(auto_now=True)
 
 class favList(models.Model):
     customer = models.OneToOneField(Customer,on_delete=models.CASCADE,null=True)

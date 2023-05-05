@@ -17,22 +17,30 @@ class SubCollectionSerializer(serializers.ModelSerializer):
     products_count = serializers.IntegerField(read_only=True)
 
 class ClothesSerializer(serializers.ModelSerializer):
+    sub_collection_name = serializers.SerializerMethodField(method_name="get_collection_name")
     class Meta:
 
         model=Clothes
-        fields=['id', 'title','gender', 'description', 'slug', 'inventory', 'unit_price', 'price_with_tax', 'collection','tags']
+        fields=['id', 'title','gender', 'description', 'slug', 'inventory', 'unit_price', 'price_with_tax', 'sub_collection_name','tags']
+
     
     price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax')
+    def get_collection_name(self, obj):
+        return obj.get_collection_name()
 
     def calculate_tax(self, product: Product):
         return product.unit_price * Decimal(1.1)
 ##
 class ProductSerializer(serializers.ModelSerializer):
+    collection_name = serializers.SerializerMethodField(method_name="get_collection_name")
 
     class Meta:
         model = Product
-        fields = ['id', 'title', 'description', 'slug', 'inventory', 'unit_price', 'price_with_tax', 'collection','tags']
+        fields = ['id', 'title', 'description', 'slug', 'inventory', 'unit_price', 'price_with_tax', 'collection_name','tags']
     price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax')
+
+    def get_collection_name(self, obj):
+        return obj.get_collection_name()
 
 
 
@@ -148,10 +156,10 @@ class AddFavSerializer(serializers.ModelSerializer):
         model = favList
         fields = ['id','product_id']
 
-class ReviewSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField(read_only=True)
-    product_id =serializers.IntegerField()
-    class Meta:
-        model = review
-        fields = ['id','product_id','user_id','rating','comment','crated_at','updated_at']
+#class ReviewSerializer(serializers.ModelSerializer):
+   # user_id = serializers.IntegerField(read_only=True)
+   # product_id =serializers.IntegerField()
+   # class Meta:
+    #    model = review
+     #   fields = ['id','product_id','user_id','rating','comment','crated_at','updated_at']
 
