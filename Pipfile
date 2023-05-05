@@ -11,6 +11,7 @@ django-filter = "*"
 django-rest-swagger = "*"
 drf-yasg = "*"
 django-debug-toolbar = "*"
+django-rest-framework-nested = "*"
 
 [dev-packages]
 
