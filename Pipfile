@@ -10,6 +10,7 @@ djoser = "*"
 django-filter = "*"
 django-rest-swagger = "*"
 drf-yasg = "*"
+django-debug-toolbar = "*"
 
 [dev-packages]
 
