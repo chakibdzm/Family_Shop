@@ -12,6 +12,8 @@ django-rest-swagger = "*"
 drf-yasg = "*"
 django-debug-toolbar = "*"
 django-rest-framework-nested = "*"
+drf-nested-routers = "*"
+pillow = "*"
 
 [dev-packages]
 
