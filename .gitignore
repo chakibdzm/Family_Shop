@@ -1,5 +1,5 @@
 # Byte-compiled / optimized / DLL files
-__pycache__/
+
 *.py[cod]
 *$py.class
 
@@ -59,11 +59,8 @@ coverage.xml
 *.log
 *.pot
 *.pyc
-__pycache__/
-/FamilyShop/settings.py
-db.sqlite3
-db.sqlite3-journal
-FamilyShop/settings.py
+
+
 # Flask stuff:
 instance/
 .webassets-cache
@@ -95,7 +92,7 @@ ipython_config.py
 #Pipfile.lock
 
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow
-__pypackages__/
+
 
 # Celery stuff
 celerybeat-schedule
@@ -129,7 +126,3 @@ venv.bak/
 dmypy.json
 
 # Pyre type checker
-.pyre/
-FamilyShop/settings.py
-
-ShopApp/migrations/0001_initial.py
