@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404,render
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet,GenericViewSet
 from .models import *
@@ -20,24 +20,30 @@ from .permissions import IsAdminOrReadOnly
 from rest_framework import status
 
 #
+
 @api_view(['GET'])
-def product_by_category(request, collection_id):
-    products = Product.objects.filter(collection_id=collection_id)
-    serializer = ProductSerializer(products, many=True)
+def product_collection(request, category_name):
+    category = get_object_or_404(Sub_collection, title=category_name)
+    products = Product.objects.filter(collection=category)
+    serializer=ProductSerializer(products,many=True)
     return Response(serializer.data)
 
 
 
-class ClothesDetail(APIView):
-    def get(self, request, gender_title):
-        try:
-            product = Clothes.objects.get(gender=gender_title)
-        except Clothes.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
 
-        serializer = ClothesSerializer(product)
+
+class ClotheViewSet(ModelViewSet):
+    queryset = Clothes.objects.all()
+    serializer_class = ClothesSerializer
+     
+    def clothes_collection(self, request, category_name=None):
+        category = get_object_or_404(Sub_collection, title=category_name)
+        gender = request.query_params.get('gender')
+        queryset = self.queryset.filter(collection=category)
+        if gender:
+            queryset = queryset.filter(gender=gender)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
-
 
 
 
@@ -78,7 +84,7 @@ class ProductViewSet(ModelViewSet):
     serializer_class = ProductSerializer
     filter_backends=(DjangoFilterBackend,SearchFilter,OrderingFilter)
     filterset_fields=['collection']
-    search_fields=['tags','title']
+    search_fields=['title']
     OrderingFilter=['price_with_tax']
     permission_classes=[IsAdminOrReadOnly]
     #
@@ -157,35 +163,35 @@ class CartItemViewSet(ModelViewSet):
         return CartItem.objects.filter(cart_id=self.kwargs['cart_pk'])
     
  
-class ReviewViewSet(ModelViewSet):
-    queryset = review.objects.all()
-    permission_classes = [IsAuthenticated]
-    serializer_class = ReviewSerializer
+#class ReviewViewSet(ModelViewSet):
+   # queryset = review.objects.all()
+    #permission_classes = [IsAuthenticated]
+    #serializer_class = ReviewSerializer
 
-    def create(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.user != request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(user=request.user)
-        return Response(serializer.data)
+   # def create(self, request, *args, **kwargs):
+   #     instance = self.get_object()
+    #    if instance.user != request.user:
+     #       return Response(status=status.HTTP_403_FORBIDDEN)
+      #  serializer = self.get_serializer(data=request.data)
+       # serializer.is_valid(raise_exception=True)
+        #serializer.save(user=request.user)
+        #return Response(serializer.data)
 
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.user != request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    #def destroy(self, request, *args, **kwargs):
+     #   instance = self.get_object()
+      #  if instance.user != request.user:
+       #     return Response(status=status.HTTP_403_FORBIDDEN)
+       # self.perform_destroy(instance)
+       # return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.user != request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        serializer = self.get_serializer(instance, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
+    #def update(self, request, *args, **kwargs):
+     #   instance = self.get_object()
+      #  if instance.user != request.user:
+       #     return Response(status=status.HTTP_403_FORBIDDEN)
+       # serializer = self.get_serializer(instance, data=request.data)
+       # serializer.is_valid(raise_exception=True)
+       # self.perform_update(serializer)
+       # return Response(serializer.data)
  
 
 class FavoriteViewSet(ModelViewSet):
