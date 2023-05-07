@@ -2,8 +2,15 @@ from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from uuid import uuid4
+from django.contrib import admin
 
 #
+class ProductAdmin(admin.ModelAdmin):
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+
 class Promotion(models.Model):
     description = models.CharField(max_length=255,null=True)
     discount = models.FloatField() #poucentage 
@@ -177,10 +184,10 @@ class payement(models.Model):
     #rating = models.IntegerField()  #5 stars haka
     #updated_at = models.DateTimeField(auto_now=True)
 
-class favList(models.Model):
-    customer = models.OneToOneField(Customer,on_delete=models.CASCADE,null=True)
-    product = models.ForeignKey(Product,on_delete=models.CASCADE,null=True)
-    created_at = models.DateField(auto_now_add=True)
+#class favList(models.Model):
+    #customer = models.OneToOneField(Customer,on_delete=models.CASCADE,null=True)
+    #product = models.ForeignKey(Product,on_delete=models.CASCADE,null=True)
+    #created_at = models.DateField(auto_now_add=True)
 
 class club(models.Model):
     name = models.CharField(max_length=255)
@@ -195,3 +202,8 @@ class club_member(models.Model):
     expiry_date = models.DateField()
     def __str__(self):
         return "%s" % (self.user.user_name)
+    
+
+class Favorite(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
