@@ -2,8 +2,15 @@ from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from uuid import uuid4
+from django.contrib import admin
 
 #
+class ProductAdmin(admin.ModelAdmin):
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+
 class Promotion(models.Model):
     description = models.CharField(max_length=255,null=True)
     discount = models.FloatField() #poucentage 
@@ -12,15 +19,22 @@ class Promotion(models.Model):
 
 class Collection(models.Model):
     title = models.CharField(max_length=255)
-    featured_product = models.ForeignKey(
-        'Product', on_delete=models.SET_NULL, null=True, related_name='+', blank=True)
-
     def __str__(self) -> str:
         return self.title
-
     class Meta:
         ordering = ['title']
 
+class Sub_collection(models.Model):
+    title=models.CharField(max_length=255)
+    parent_collection=models.ForeignKey(Collection, on_delete=models.CASCADE, related_name='subcollections')
+    
+
+    
+    
+
+   
+    def __str__(self) ->str:
+        return self.title
 #
 class Product(models.Model):
     title = models.CharField(max_length=255)
@@ -33,22 +47,40 @@ class Product(models.Model):
         validators=[MinValueValidator(1)])
     inventory = models.IntegerField(validators=[MinValueValidator(0)])
     last_update = models.DateTimeField(auto_now=True)
-    collection = models.ForeignKey(Collection, on_delete=models.PROTECT, related_name='products')
+    collection = models.ForeignKey(Sub_collection, on_delete=models.CASCADE, related_name='products')
     promotions = models.ManyToManyField(Promotion, blank=True)
     
 
     def __str__(self) -> str:
         return self.title
+    
+    def get_collection_name(self):
+        return self.collection.title
+    
+   
 
     class Meta:
         ordering = ['title']
 
-class Product_variation(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    description = models.TextField(max_length=255)
+
+class Clothes(Product):
+    GENDER_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('K', 'Kids'),
+    )
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+
+    def get_collection_name(self):
+        return self.collection.title
+    
+
+class Product_variation(Product):
+
     image = models.ImageField()
-    price = models.DecimalField(null=True, decimal_places=2, max_digits=100)
+    color = models.TextField(null=True,blank=True)
+    size = models.TextField(null=True,blank=True)
+    #material = models.CharField(max_length=50)
 
 
 class Customer(models.Model):
@@ -144,17 +176,18 @@ class payement(models.Model):
     payment_date = models.DateField(auto_now_add=True)
     payment_cost = models.DecimalField(max_digits=10,decimal_places=2,null=True)
 
-class review(models.Model):
-    customer = models.ForeignKey(Customer,on_delete=models.CASCADE,null=True)
-    review_date = models.DateField(auto_now_add=True)
-    comment = models.TextField(max_length=255)
-    product = models.ForeignKey(Product,on_delete=models.CASCADE, null=True)
-    rating = models.CharField(max_length=5)  #5 stars haka
+#class review(models.Model):
+   # customer = models.ForeignKey(Customer,on_delete=models.CASCADE,null=True)
+    #created_at = models.DateField(auto_now_add=True)
+    #comment = models.TextField(max_length=255)
+    #product = models.ForeignKey(Product,on_delete=models.CASCADE, null=True)
+    #rating = models.IntegerField()  #5 stars haka
+    #updated_at = models.DateTimeField(auto_now=True)
 
-class favList(models.Model):
-    customer = models.OneToOneField(Customer,on_delete=models.CASCADE,null=True)
-    items = models.ForeignKey(Product,on_delete=models.CASCADE,null=True)
-    created_date = models.DateField(auto_now_add=True)
+#class favList(models.Model):
+    #customer = models.OneToOneField(Customer,on_delete=models.CASCADE,null=True)
+    #product = models.ForeignKey(Product,on_delete=models.CASCADE,null=True)
+    #created_at = models.DateField(auto_now_add=True)
 
 class club(models.Model):
     name = models.CharField(max_length=255)
@@ -169,3 +202,8 @@ class club_member(models.Model):
     expiry_date = models.DateField()
     def __str__(self):
         return "%s" % (self.user.user_name)
+    
+
+class Favorite(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)

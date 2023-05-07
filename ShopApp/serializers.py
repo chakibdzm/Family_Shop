@@ -1,21 +1,53 @@
 from rest_framework import serializers
 from decimal import Decimal
-from .models import Product, Collection, Cart, CartItem, Customer
+from .models import *
+from .models import Favorite
+
 
 
 class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
-        fields = ['id', 'title', 'products_count']
-    products_count = serializers.IntegerField(read_only=True)
-    #
+        fields = ['id', 'title']
+    
+    
 
+class SubCollectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Sub_collection
+        fields=['id','parent_collection','title']
+    products_count = serializers.IntegerField(read_only=True)
+
+class ClothesSerializer(serializers.ModelSerializer):
+    sub_collection_name = serializers.SerializerMethodField(method_name="get_collection_name")
+    class Meta:
+
+        model=Clothes
+        fields=['id', 'title','gender', 'description', 'slug', 'inventory', 'unit_price', 'price_with_tax', 'sub_collection_name','tags']
+
+    
+    price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax')
+    def get_collection_name(self, obj):
+        return obj.get_collection_name()
+
+    def calculate_tax(self, product: Product):
+        return product.unit_price * Decimal(1.1)
 ##
 class ProductSerializer(serializers.ModelSerializer):
+    collection_name = serializers.SerializerMethodField(method_name="get_collection_name")
+
     class Meta:
         model = Product
-        fields = ['id', 'title', 'description', 'slug', 'inventory', 'unit_price', 'price_with_tax', 'collection','tags']
+        fields = ['id', 'title', 'description', 'slug', 'inventory', 'unit_price', 'price_with_tax', 'collection_name','tags']
     price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax')
+
+    def get_collection_name(self, obj):
+        return obj.get_collection_name()
+
+
+
+
+
     #collection = serializers.HyperlinkedRelatedField(
     #    queryset = Collection.objects.all(),
     #    view_name='collection-detail'
@@ -91,6 +123,53 @@ class AddCartItemSerializer(serializers.ModelSerializer):
 
 
 class CustomerSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(read_only=True)
     class Meta:
         model = Customer
-        fields = ['phone', 'birth_date', 'membership', 'user']     
+        fields = ['id','user_id','phone', 'birth_date', 'membership', ]  
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favorite
+        fields = ('id', 'product', 'created_at')
+
+    
+    #permission_classes = (permissions.IsAuthenticated,)
+
+#class FavListSerializer(serializers.ModelSerializer):
+   # product_id = serializers.IntegerField()
+   # user_id = serializers.IntegerField(read_only=True)
+   # class Meta:
+    #    model = favList
+     #   fields = ['id','product_id','user_id','created_at']
+
+#class AddFavSerializer(serializers.ModelSerializer):
+ #   product_id = serializers.IntegerField()
+#
+ #   def validate_product_id(self, value):
+  #      if not Product.objects.filter(pk=value).exists():
+   #         raise serializers.ValidationError('No product with the given ID was found.')
+    #    return value
+    #def save(self, **kwargs):
+     #   fav_id = self.context['fav_id']
+      #  product_id = self.validated_data['product_id']
+       # try:
+        #    favItem = favList.objects.get(product_id= product_id,fav_id=fav_id)
+         #   self.instance = serializers.ValidationError('This product is already in your favorites.')
+        #except favItem.DoesNotExist:
+        #    favItem = favList.objects.create(fav_id=fav_id, product_id=product_id)
+         #   favItem.save()
+         #   self.instance = favItem
+        #return self.instance
+
+   # class Meta:
+    #    model = favList
+     #   fields = ['id','product_id']
+
+#class ReviewSerializer(serializers.ModelSerializer):
+   # user_id = serializers.IntegerField(read_only=True)
+   # product_id =serializers.IntegerField()
+   # class Meta:
+    #    model = review
+     #   fields = ['id','product_id','user_id','rating','comment','crated_at','updated_at']
+

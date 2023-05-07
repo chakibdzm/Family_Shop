@@ -132,3 +132,4 @@ dmypy.json
 .pyre/
 FamilyShop/settings.py
 
+ShopApp/migrations/0001_initial.py
