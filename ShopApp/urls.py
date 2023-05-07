@@ -10,7 +10,7 @@ router.register('customers', views.CustomerViewSet)
 router.register('Categories', views.CollectionViewSet)
 router.register('carts', views.CartViewSet)
 router.register(r'clothes',views.ClotheViewSet)
-router.register('favorites',views.FavoriteViewSet)
+#router.register('favorites',views.FavoriteViewSet)
 #router.register('reviews',views.ReviewViewSet)
 
 carts_router = NestedDefaultRouter(router, 'carts', lookup = 'cart')
@@ -21,9 +21,11 @@ carts_router.register('items', views.CartItemViewSet, basename='cart-items')
 urlpatterns = router.urls+carts_router.urls+[
     path('products/<int:product_id>',views.ProductDetail.as_view()),
     path('products/collection/<str:category_name>/', product_collection),
-    path('clothes/collection/<str:category_name>/',views.ClotheViewSet.as_view({'get': 'clothes_collection'}), name='clothes-collection'),        
-    path('favorites/remove/<int:product_id>/', views.FavoriteViewSet.as_view({'delete': 'destroy'})),
-    path('favorites/add/<int:product_id>/', views.FavoriteViewSet.as_view({'post': 'create'})),
+    path('clothes/collection/<str:category_name>/',views.ClotheViewSet.as_view({'get': 'clothes_collection'}), name='clothes-collection'),  
+    path('favorites/', FavoriteList.as_view(), name='favorite_list'),
+    path('favorites/<int:pk>/', FavoriteDetail.as_view(), name='favorite_detail'),   
+    #path('favorites/remove/<int:product_id>/', views.FavoriteViewSet.as_view({'delete': 'destroy'})),
+    #path('favorites/add/<int:product_id>/', views.FavoriteViewSet.as_view({'post': 'create'})),
     #path('reviews/add/<int:product_id>/', views.ReviewViewSet.as_view({'post': 'create'})),
     #path('reviews/update/<int:product_id>/', views.ReviewViewSet.as_view({'patch': 'update'})),
     #path('reviews/remove/<int:product_id>/', views.ReviewViewSet.as_view({'delete': 'destroy'})),

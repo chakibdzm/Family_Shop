@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet,GenericViewSet
 from .models import *
 from .serializers import *
+from rest_framework.exceptions import NotFound
 from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter,OrderingFilter
@@ -148,7 +149,7 @@ class CartItemViewSet(ModelViewSet):
     def get_serializer_context(self):
         return {'cart_id': self.kwargs['cart_pk']}
 
-    #@action(detail=False,methods=['POST','PATCH'],permission_classes=[IsAuthenticated])
+    @action(detail=False,methods=['POST','PATCH'],permission_classes=[IsAuthenticated])
     def get_serializer_class(self):
         if self.request.method == "POST":
             return AddCartItemSerializer
@@ -159,8 +160,19 @@ class CartItemViewSet(ModelViewSet):
     def get_queryset(self):
         return CartItem.objects.filter(cart_id=self.kwargs['cart_pk'])
     
- 
-#class ReviewViewSet(ModelViewSet):
+
+
+class FavoriteList(generics.ListCreateAPIView):
+    serializer_class = FavoriteSerializer
+    queryset=Favorite.objects.all() 
+
+
+class FavoriteDetail(generics.RetrieveDestroyAPIView):
+    serializer_class = FavoriteSerializer
+    #permission_classes = (permissions.IsAuthenticated,)
+    queryset = Favorite.objects.all()
+
+    #class ReviewViewSet(ModelViewSet):
    # queryset = review.objects.all()
     #permission_classes = [IsAuthenticated]
     #serializer_class = ReviewSerializer
@@ -191,30 +203,26 @@ class CartItemViewSet(ModelViewSet):
        # return Response(serializer.data)
  
 
-class TestViewSet(ModelViewSet):
-    serializer_class=ProductSerializer
-    queryset=Product.objects.all()
 
 
-
-class FavoriteViewSet(ModelViewSet):
+#class FavoriteViewSet(ModelViewSet):
    # permission_classes = [IsAuthenticated] || user can add to fav without acc
-    serializer_class = FavListSerializer
-    queryset = favList.objects.all()
+ #   serializer_class = FavListSerializer
+  #  queryset = favList.objects.all()
 
-    def get_serializer_class(self):
-        if self.request.method == "POST":
-            return AddFavSerializer
-        return FavListSerializer
+   # def get_serializer_class(self):
+    #    if self.request.method == "POST":
+     #       return AddFavSerializer
+      #  return FavListSerializer
     
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer_class()
-        return Response(serializer.data)
+    #def create(self, request, *args, **kwargs):
+     #   serializer = self.get_serializer_class()
+      #  return Response(serializer.data)
 
-    def destroy(self, request, *args, **kwargs):
-        product_id = kwargs.get('pk')
-        product = get_object_or_404(Product, id=product_id)
-        favorite = get_object_or_404(favList, user=request.user, product=product)
-        favorite.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    #def destroy(self, request, *args, **kwargs):
+     #   product_id = kwargs.get('pk')
+      #  product = get_object_or_404(Product, id=product_id)
+       # favorite = get_object_or_404(favList, user=request.user, product=product)
+        #favorite.delete()
+        #return Response(status=status.HTTP_204_NO_CONTENT)
 
