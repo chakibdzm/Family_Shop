@@ -3,8 +3,8 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from uuid import uuid4
 from django.contrib import admin
-
-#
+from django.utils import timezone
+#from datetime import timedelta
 class ProductAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
@@ -13,9 +13,10 @@ class ProductAdmin(admin.ModelAdmin):
 
 class Promotion(models.Model):
     description = models.CharField(max_length=255,null=True)
-    discount = models.FloatField() #poucentage 
+    discount = models.DecimalField(max_digits=5, decimal_places=2) #poucentage 
     date_start = models.DateField()
     date_end = models.DateField()
+
 
 class Collection(models.Model):
     title = models.CharField(max_length=255)
@@ -49,6 +50,17 @@ class Product(models.Model):
     last_update = models.DateTimeField(auto_now=True)
     collection = models.ForeignKey(Sub_collection, on_delete=models.CASCADE, related_name='products')
     promotions = models.ManyToManyField(Promotion, blank=True)
+
+    def get_discounted_price(self):
+        """Returns the unit price after applying any promotions."""
+        now = timezone.now().date()
+        try:
+            promotion = self.promotions.get(date_start__lte=now, date_end__gte=now)
+        except Promotion.DoesNotExist:
+            return self.unit_price
+        else:
+            discount_factor = 1 - (promotion.discount / 100)
+            return self.unit_price * discount_factor
     
 
     def __str__(self) -> str:
@@ -109,11 +121,9 @@ class Customer(models.Model):
 class Order(models.Model):
     PAYMENT_STATUS_PENDING = 'P'
     PAYMENT_STATUS_COMPLETE = 'C'
-    PAYMENT_STATUS_FAILED = 'F'
     PAYMENT_STATUS_CHOICES = [
         (PAYMENT_STATUS_PENDING, 'Pending'),
-        (PAYMENT_STATUS_COMPLETE, 'Complete'),
-        (PAYMENT_STATUS_FAILED, 'Failed')
+        (PAYMENT_STATUS_COMPLETE, 'Complete')
     ]
 
     placed_at = models.DateTimeField(auto_now_add=True)
@@ -121,9 +131,13 @@ class Order(models.Model):
         max_length=1, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING)
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
 
+    #def is_deletable(self):
+    #    """Returns True if the order can be deleted by the user."""
+    #    now = timezone.now()
+    #    return self.placed_at + timedelta(days=3) > now
 
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.PROTECT)
+    order = models.ForeignKey(Order, on_delete=models.PROTECT,related_name='items')
     Product_variation = models.ManyToManyField(Product_variation)
     quantity = models.PositiveSmallIntegerField()
     unit_price = models.DecimalField(max_digits=6, decimal_places=2)

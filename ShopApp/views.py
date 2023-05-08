@@ -145,7 +145,7 @@ class CustomerViewSet(ModelViewSet):
     
 class CartItemViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
-
+    #permission_classes=[IsAuthenticated]
     def get_serializer_context(self):
         return {'cart_id': self.kwargs['cart_pk']}
 
@@ -173,6 +173,37 @@ class FavoriteDetail(generics.RetrieveDestroyAPIView):
     queryset = Favorite.objects.all()
 
     #class ReviewViewSet(ModelViewSet):
+
+
+class OrderViewSet(ModelViewSet):
+    #permission_classes = [IsAuthenticated]
+    queryset= Order.objects.prefetch_related('items__product').all()
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return AddOrderSerializer
+        return OrderSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = AddOrderSerializer(data=request.data,context={'user_id': self.request.user.id})
+        serializer.is_valid(raise_exception=True)
+        order = serializer.save()
+        serializer = OrderSerializer(order)
+        return Response(serializer.data)
+    
+    #def destroy(self, request, *args, **kwargs):
+    #    instance = self.get_object()
+    #    if instance.is_deletable():
+    #        self.perform_destroy(instance)
+    #        return Response(status=status.HTTP_204_NO_CONTENT)
+    #    else:
+    #        return Response({'detail': 'This order cannot be deleted.'}, status=status.HTTP_403_FORBIDDEN)
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+            return Order.objects.all()
+ 
+#class ReviewViewSet(ModelViewSet):
    # queryset = review.objects.all()
     #permission_classes = [IsAuthenticated]
     #serializer_class = ReviewSerializer

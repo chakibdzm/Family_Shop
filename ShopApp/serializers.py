@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from decimal import Decimal
 from .models import *
-from .models import Favorite
-
+#from .models import Favorite
+from django.db import transaction
 
 
 class CollectionSerializer(serializers.ModelSerializer):
@@ -23,12 +23,16 @@ class ClothesSerializer(serializers.ModelSerializer):
     class Meta:
 
         model=Clothes
-        fields=['id', 'title','gender', 'description', 'slug', 'inventory', 'unit_price', 'price_with_tax', 'sub_collection_name','tags']
+        fields=['id', 'title','gender', 'description', 'slug', 'inventory', 'unit_price','discounted_price', 'price_with_tax', 'sub_collection_name','tags']
 
     
     price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax')
+    discounted_price = serializers.SerializerMethodField(method_name='get_discounted_price')
     def get_collection_name(self, obj):
         return obj.get_collection_name()
+    
+    def get_discounted_price(self, obj):
+        return obj.get_discounted_price()
 
     def calculate_tax(self, product: Product):
         return product.unit_price * Decimal(1.1)
@@ -38,20 +42,19 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'title', 'description', 'slug', 'inventory', 'unit_price', 'price_with_tax', 'collection_name','tags']
+        fields = ['id', 'title', 'description', 'slug', 'inventory', 'unit_price','discounted_price', 'price_with_tax', 'collection_name','tags']
     price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax')
-
+    discounted_price = serializers.SerializerMethodField(method_name='get_discounted_price')
     def get_collection_name(self, obj):
         return obj.get_collection_name()
-
-
-
-
 
     #collection = serializers.HyperlinkedRelatedField(
     #    queryset = Collection.objects.all(),
     #    view_name='collection-detail'
     #)
+
+    def get_discounted_price(self, obj):
+        return obj.get_discounted_price()
 
     def calculate_tax(self, product: Product):
         return product.unit_price * Decimal(1.1)
@@ -121,6 +124,40 @@ class AddCartItemSerializer(serializers.ModelSerializer):
         model = CartItem
         fields = ['id', 'product_id', 'quantity']
 
+class OrderItemSerializer(serializers.ModelSerializer):
+    product = CartProductSerializer()
+    class Meta:
+        model = OrderItem
+        fields = ['id','product','total_price']
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True)
+    class Meta:
+        model = Order
+        fields = ['id', 'user','items','status', 'placed_at']
+
+class AddOrderSerializer(serializers.Serializer):
+    cart_id = serializers.UUIDField()
+
+    def save(self, **kwargs):
+        with transaction.atomic():
+            cart_id = self.validated_data['cart_id']
+            (customer, created) = Customer.objects.get_or_create(user_id=self.context['user_id'])
+            order = Order.objects.create(customer=customer)
+
+            cart_items = CartItem.objects.select_related('product').filter(cart_id=cart_id)
+            order_items = [
+                OrderItem(
+                    order = order,
+                    product = item.product,
+                    price = item.product.unit_price,
+                    quantity = item.quantity
+                )for item in cart_items
+            ]
+            OrderItem.objects.bulk_create(order_items)
+            Cart.objects.filter(pk=cart_id).delete
+            return order
 
 class CustomerSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(read_only=True)
