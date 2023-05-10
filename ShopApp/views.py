@@ -19,6 +19,7 @@ from rest_framework.mixins import CreateModelMixin,RetrieveModelMixin,UpdateMode
 from rest_framework.permissions import IsAuthenticated,AllowAny,IsAdminUser
 from .permissions import IsAdminOrReadOnly
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
 
 #
 
@@ -28,6 +29,15 @@ def product_collection(request, category_name):
     products = Product.objects.filter(collection=category)
     serializer=ProductSerializer(products,many=True)
     return Response(serializer.data)
+
+
+class CommentCreateAPIView(generics.CreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 class ClotheViewSet(ModelViewSet):
@@ -45,7 +55,7 @@ class ClotheViewSet(ModelViewSet):
 
 
 
-class ProductDetail(APIView):
+class ProductDetail(generics.RetrieveAPIView):
     def get(self, request, product_id):
         try:
             product = Product.objects.get(id=product_id)
@@ -54,6 +64,12 @@ class ProductDetail(APIView):
 
         serializer = ProductSerializer(product)
         return Response(serializer.data)
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
     
 class ClothesViewSet(ModelViewSet):
     queryset=Clothes.objects.all()
@@ -80,12 +96,13 @@ class CategoryDetail(APIView):
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.select_related('collection').all()
     serializer_class = ProductSerializer
+    parser_classes = (MultiPartParser, FormParser)
     filter_backends=(DjangoFilterBackend,SearchFilter,OrderingFilter)
     filterset_fields=['collection']
     search_fields=['title']
     OrderingFilter=['price_with_tax']
     permission_classes=[IsAdminOrReadOnly]
-    #
+
     #
     
     def get_serializer_context(self):
@@ -145,7 +162,7 @@ class CustomerViewSet(ModelViewSet):
     
 class CartItemViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
-
+    #permission_classes=[IsAuthenticated]
     def get_serializer_context(self):
         return {'cart_id': self.kwargs['cart_pk']}
 
@@ -172,57 +189,34 @@ class FavoriteDetail(generics.RetrieveDestroyAPIView):
     #permission_classes = (permissions.IsAuthenticated,)
     queryset = Favorite.objects.all()
 
-    #class ReviewViewSet(ModelViewSet):
-   # queryset = review.objects.all()
-    #permission_classes = [IsAuthenticated]
-    #serializer_class = ReviewSerializer
-
-   # def create(self, request, *args, **kwargs):
-   #     instance = self.get_object()
-    #    if instance.user != request.user:
-     #       return Response(status=status.HTTP_403_FORBIDDEN)
-      #  serializer = self.get_serializer(data=request.data)
-       # serializer.is_valid(raise_exception=True)
-        #serializer.save(user=request.user)
-        #return Response(serializer.data)
-
-    #def destroy(self, request, *args, **kwargs):
-     #   instance = self.get_object()
-      #  if instance.user != request.user:
-       #     return Response(status=status.HTTP_403_FORBIDDEN)
-       # self.perform_destroy(instance)
-       # return Response(status=status.HTTP_204_NO_CONTENT)
-
-    #def update(self, request, *args, **kwargs):
-     #   instance = self.get_object()
-      #  if instance.user != request.user:
-       #     return Response(status=status.HTTP_403_FORBIDDEN)
-       # serializer = self.get_serializer(instance, data=request.data)
-       # serializer.is_valid(raise_exception=True)
-       # self.perform_update(serializer)
-       # return Response(serializer.data)
- 
-
-
-
-#class FavoriteViewSet(ModelViewSet):
-   # permission_classes = [IsAuthenticated] || user can add to fav without acc
- #   serializer_class = FavListSerializer
-  #  queryset = favList.objects.all()
-
-   # def get_serializer_class(self):
-    #    if self.request.method == "POST":
-     #       return AddFavSerializer
-      #  return FavListSerializer
     
-    #def create(self, request, *args, **kwargs):
-     #   serializer = self.get_serializer_class()
-      #  return Response(serializer.data)
 
+
+class OrderViewSet(ModelViewSet):
+    #permission_classes = [IsAuthenticated]
+    queryset= Order.objects.prefetch_related('items__product').all()
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return AddOrderSerializer
+        return OrderSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = AddOrderSerializer(data=request.data,context={'user_id': self.request.user.id})
+        serializer.is_valid(raise_exception=True)
+        order = serializer.save()
+        serializer = OrderSerializer(order)
+        return Response(serializer.data)
+    
     #def destroy(self, request, *args, **kwargs):
-     #   product_id = kwargs.get('pk')
-      #  product = get_object_or_404(Product, id=product_id)
-       # favorite = get_object_or_404(favList, user=request.user, product=product)
-        #favorite.delete()
-        #return Response(status=status.HTTP_204_NO_CONTENT)
+    #    instance = self.get_object()
+    #    if instance.is_deletable():
+    #        self.perform_destroy(instance)
+    #        return Response(status=status.HTTP_204_NO_CONTENT)
+    #    else:
+    #        return Response({'detail': 'This order cannot be deleted.'}, status=status.HTTP_403_FORBIDDEN)
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+            return Order.objects.all()
+ 
