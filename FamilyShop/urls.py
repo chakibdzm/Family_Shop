@@ -38,7 +38,6 @@ urlpatterns = [
     path('__debug__/', include(debug_toolbar.urls)),
     
     #path('admin/', admin.site.urls),
-    path('ShopApp/', include('ShopApp.urls')),
     path('__debug__/', include(debug_toolbar.urls)),
 ]
 

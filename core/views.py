@@ -7,12 +7,21 @@ from rest_framework.response import Response
 from core.models import User
 from .serializers import UserSerializer
 
-class RegisterView(APIView):
-    def post(self, request):
-        serializer = UserSerializer(data=request.data)
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.mixins import CreateModelMixin
+
+class RegisterView(GenericViewSet, CreateModelMixin):
+    serializer_class = UserSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        self.perform_create(serializer)
         return Response(serializer.data)
+
+    def perform_create(self, serializer):
+        serializer.save()
+
     
 
 class LoginView(APIView):
