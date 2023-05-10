@@ -3,19 +3,32 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from uuid import uuid4
 from django.contrib import admin
-
-#
+from django.utils import timezone
+#from datetime import timedelta
 class ProductAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
+    
+    def archive_selected_products(modeladmin, request, queryset):
+        queryset.update(is_archived=True)
+    archive_selected_products.short_description = "Archive selected products"
+    actions = [archive_selected_products]
+    list_display = ['title', 'is_archived']
+
+    
+
+
+
+
 
 
 
 class Promotion(models.Model):
     description = models.CharField(max_length=255,null=True)
-    discount = models.FloatField() #poucentage 
+    discount = models.DecimalField(max_digits=5, decimal_places=2) #poucentage 
     date_start = models.DateField()
     date_end = models.DateField()
+
 
 class Collection(models.Model):
     title = models.CharField(max_length=255)
@@ -46,9 +59,22 @@ class Product(models.Model):
         decimal_places=2,
         validators=[MinValueValidator(1)])
     inventory = models.IntegerField(validators=[MinValueValidator(0)])
+    image = models.ImageField(upload_to = 'images',  blank = True, null=True, default='')
     last_update = models.DateTimeField(auto_now=True)
     collection = models.ForeignKey(Sub_collection, on_delete=models.CASCADE, related_name='products')
     promotions = models.ManyToManyField(Promotion, blank=True)
+    is_archived = models.BooleanField(default=False)
+
+    def get_discounted_price(self):
+        """Returns the unit price after applying any promotions."""
+        now = timezone.now().date()
+        try:
+            promotion = self.promotions.get(date_start__lte=now, date_end__gte=now)
+        except Promotion.DoesNotExist:
+            return self.unit_price
+        else:
+            discount_factor = 1 - (promotion.discount / 100)
+            return self.unit_price * discount_factor
     
 
     def __str__(self) -> str:
@@ -56,12 +82,22 @@ class Product(models.Model):
     
     def get_collection_name(self):
         return self.collection.title
-    
-   
-
+     
     class Meta:
         ordering = ['title']
 
+class ProImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name = "images")
+    image = models.ImageField(upload_to="images", default="", null=True, blank=True)
+
+class Comment(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
 
 class Clothes(Product):
     GENDER_CHOICES = (
@@ -75,12 +111,6 @@ class Clothes(Product):
         return self.collection.title
     
 
-class Product_variation(Product):
-
-    image = models.ImageField()
-    color = models.TextField(null=True,blank=True)
-    size = models.TextField(null=True,blank=True)
-    #material = models.CharField(max_length=50)
 
 
 class Customer(models.Model):
@@ -109,22 +139,24 @@ class Customer(models.Model):
 class Order(models.Model):
     PAYMENT_STATUS_PENDING = 'P'
     PAYMENT_STATUS_COMPLETE = 'C'
-    PAYMENT_STATUS_FAILED = 'F'
     PAYMENT_STATUS_CHOICES = [
         (PAYMENT_STATUS_PENDING, 'Pending'),
-        (PAYMENT_STATUS_COMPLETE, 'Complete'),
-        (PAYMENT_STATUS_FAILED, 'Failed')
+        (PAYMENT_STATUS_COMPLETE, 'Complete')
     ]
 
     placed_at = models.DateTimeField(auto_now_add=True)
     payment_status = models.CharField(
         max_length=1, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING)
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
-
+    user=models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    #def is_deletable(self):
+    #    """Returns True if the order can be deleted by the user."""
+    #    now = timezone.now()
+    #    return self.placed_at + timedelta(days=3) > now
 
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.PROTECT)
-    Product_variation = models.ManyToManyField(Product_variation)
+    order = models.ForeignKey(Order, on_delete=models.PROTECT,related_name='items')
+    Product = models.ManyToManyField(Product)
     quantity = models.PositiveSmallIntegerField()
     unit_price = models.DecimalField(max_digits=6, decimal_places=2)
 
@@ -176,18 +208,7 @@ class payement(models.Model):
     payment_date = models.DateField(auto_now_add=True)
     payment_cost = models.DecimalField(max_digits=10,decimal_places=2,null=True)
 
-#class review(models.Model):
-   # customer = models.ForeignKey(Customer,on_delete=models.CASCADE,null=True)
-    #created_at = models.DateField(auto_now_add=True)
-    #comment = models.TextField(max_length=255)
-    #product = models.ForeignKey(Product,on_delete=models.CASCADE, null=True)
-    #rating = models.IntegerField()  #5 stars haka
-    #updated_at = models.DateTimeField(auto_now=True)
 
-#class favList(models.Model):
-    #customer = models.OneToOneField(Customer,on_delete=models.CASCADE,null=True)
-    #product = models.ForeignKey(Product,on_delete=models.CASCADE,null=True)
-    #created_at = models.DateField(auto_now_add=True)
 
 class club(models.Model):
     name = models.CharField(max_length=255)
@@ -207,3 +228,5 @@ class club_member(models.Model):
 class Favorite(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
