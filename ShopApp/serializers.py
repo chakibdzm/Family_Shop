@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from decimal import Decimal
 from .models import *
-#from .models import Favorite
 from django.db import transaction
 
 
