@@ -1,5 +1,5 @@
 # Byte-compiled / optimized / DLL files
-
+__pycache__/
 *.py[cod]
 *$py.class
 
@@ -58,10 +58,11 @@ coverage.xml
 # Django stuff:
 *.log
 *.pot
-
-
+*.pyc
+__pycache__/
 /FamilyShop/settings.py
-
+db.sqlite3
+db.sqlite3-journal
 FamilyShop/settings.py
 # Flask stuff:
 instance/
@@ -131,4 +132,4 @@ dmypy.json
 .pyre/
 FamilyShop/settings.py
 
-
+ShopApp/migrations/0001_initial.py
