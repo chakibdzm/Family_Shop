@@ -14,6 +14,7 @@ django-debug-toolbar = "*"
 django-rest-framework-nested = "*"
 drf-nested-routers = "*"
 pillow = "*"
+django-baton = "*"
 
 [dev-packages]
 
