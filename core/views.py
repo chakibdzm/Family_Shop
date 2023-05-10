@@ -10,17 +10,12 @@ from .serializers import UserSerializer
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import CreateModelMixin
 
-class RegisterView(GenericViewSet, CreateModelMixin):
-    serializer_class = UserSerializer
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+class RegisterView(APIView):
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        return Response(serializer.data)
-
-    def perform_create(self, serializer):
         serializer.save()
+        return Response(serializer.data)
 
     
 
