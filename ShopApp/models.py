@@ -110,6 +110,9 @@ class Clothes(Product):
     def get_collection_name(self):
         return self.collection.title
     
+    class Meta:
+        db_table = 'shopapp_product_clothes_men'
+    
 
 
 
