@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "5eeb34b1bac8f929988ff858159a223ee21d86e5bf1e5103500d582790dfa6bd"
+            "sha256": "90d07102a549051e885ff55045bee21437775f53d033e3a781bcbad76d031572"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -48,11 +48,11 @@
         },
         "certifi": {
             "hashes": [
-                "sha256:35824b4c3a97115964b408844d64aa14db1cc518f6562e8d7261699d1350a9e3",
-                "sha256:4ad3232f5e926d6718ec31cfc1fcadfde020920e278684144551c91769c7bc18"
+                "sha256:0f0d56dc5a6ad56fd4ba36484d6cc34451e1c6548c61daad8c320169f91eddc7",
+                "sha256:c6c2e98f5c7869efca1f8916fed228dd91539f9f1b444c314c06eef02980c716"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==2022.12.7"
+            "version": "==2023.5.7"
         },
         "cffi": {
             "hashes": [
@@ -258,6 +258,14 @@
             ],
             "markers": "python_version >= '3.8'",
             "version": "==4.2.1"
+        },
+        "django-baton": {
+            "hashes": [
+                "sha256:a5f5eacaa0b64c4fa4a94eb1071cf79c988bb34fb9c409fdd5eecad6d72af8d5",
+                "sha256:a9e2d44c57f3db0d4c01bcf17d11362f3f044aff61803ad2f72d88c4f00bbb89"
+            ],
+            "index": "pypi",
+            "version": "==2.7.1"
         },
         "django-debug-toolbar": {
             "hashes": [
@@ -573,11 +581,11 @@
         },
         "ruamel.yaml": {
             "hashes": [
-                "sha256:40e549c264e799d8e4cd9e54e869ffa60c9436e1ef497500b08fbda3b92a1517",
-                "sha256:605510839d5af3ae730f3ed6408b7004c83f97aa2b732f6f366da7c2fc2f0d9c"
+                "sha256:90e398ee24524ebe20fc48cd1861cedd25520457b9a36cfb548613e57fde30a0",
+                "sha256:f251bd9096207af604af69d6495c3c650a3338d0493d27b04bc55477d7a884ed"
             ],
             "markers": "python_version >= '3'",
-            "version": "==0.17.23"
+            "version": "==0.17.24"
         },
         "ruamel.yaml.clib": {
             "hashes": [

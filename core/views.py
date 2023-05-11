@@ -7,12 +7,17 @@ from rest_framework.response import Response
 from core.models import User
 from .serializers import UserSerializer
 
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.mixins import CreateModelMixin
+
 class RegisterView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+    
+
     
 
 class LoginView(APIView):
@@ -29,7 +34,7 @@ class LoginView(APIView):
         
         payload = {
             'id': user.id,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=48),
             'iat': datetime.datetime.utcnow()
         }
 

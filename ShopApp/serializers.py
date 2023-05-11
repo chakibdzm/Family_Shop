@@ -1,14 +1,25 @@
 from rest_framework import serializers
 from decimal import Decimal
 from .models import *
-#from .models import Favorite
 from django.db import transaction
 
+
+class CommentSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+
+    class Meta:
+        model = Comment
+        fields = ('id', 'product', 'user', 'text', 'created_at')
 
 class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
         fields = ['id', 'title']
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProImage
+        fields = ["id", "product", "image"]
     
     
 
@@ -39,20 +50,30 @@ class ClothesSerializer(serializers.ModelSerializer):
 ##
 class ProductSerializer(serializers.ModelSerializer):
     collection_name = serializers.SerializerMethodField(method_name="get_collection_name")
+    comments = CommentSerializer(many=True, read_only=True)
+    images = ProductImageSerializer(many=True, read_only=True)
+    uploaded_images = serializers.ListField(
+        child = serializers.ImageField(max_length = 1000000, allow_empty_file = False, use_url = False),
+        write_only=True)
+    
+    
 
     class Meta:
         model = Product
-        fields = ['id', 'title', 'description', 'slug', 'inventory', 'unit_price','discounted_price', 'price_with_tax', 'collection_name','tags']
+        fields = ['id', 'title', 'description', 'slug', 'inventory', 'unit_price','discounted_price', 'price_with_tax', 'collection_name','tags','comments','images', 'uploaded_images']
     price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax')
     discounted_price = serializers.SerializerMethodField(method_name='get_discounted_price')
     def get_collection_name(self, obj):
         return obj.get_collection_name()
+    
+    def create(self, validated_data):
+        uploaded_images = validated_data.pop("uploaded_images")
+        product = Product.objects.create(**validated_data)
+        for image in uploaded_images:
+            newproduct_image = ProImage.objects.create(product=product, image=image)
+        return product
 
-    #collection = serializers.HyperlinkedRelatedField(
-    #    queryset = Collection.objects.all(),
-    #    view_name='collection-detail'
-    #)
-
+   
     def get_discounted_price(self, obj):
         return obj.get_discounted_price()
 
@@ -171,42 +192,3 @@ class FavoriteSerializer(serializers.ModelSerializer):
         fields = ('id', 'product', 'created_at')
 
     
-    #permission_classes = (permissions.IsAuthenticated,)
-
-#class FavListSerializer(serializers.ModelSerializer):
-   # product_id = serializers.IntegerField()
-   # user_id = serializers.IntegerField(read_only=True)
-   # class Meta:
-    #    model = favList
-     #   fields = ['id','product_id','user_id','created_at']
-
-#class AddFavSerializer(serializers.ModelSerializer):
- #   product_id = serializers.IntegerField()
-#
- #   def validate_product_id(self, value):
-  #      if not Product.objects.filter(pk=value).exists():
-   #         raise serializers.ValidationError('No product with the given ID was found.')
-    #    return value
-    #def save(self, **kwargs):
-     #   fav_id = self.context['fav_id']
-      #  product_id = self.validated_data['product_id']
-       # try:
-        #    favItem = favList.objects.get(product_id= product_id,fav_id=fav_id)
-         #   self.instance = serializers.ValidationError('This product is already in your favorites.')
-        #except favItem.DoesNotExist:
-        #    favItem = favList.objects.create(fav_id=fav_id, product_id=product_id)
-         #   favItem.save()
-         #   self.instance = favItem
-        #return self.instance
-
-   # class Meta:
-    #    model = favList
-     #   fields = ['id','product_id']
-
-#class ReviewSerializer(serializers.ModelSerializer):
-   # user_id = serializers.IntegerField(read_only=True)
-   # product_id =serializers.IntegerField()
-   # class Meta:
-    #    model = review
-     #   fields = ['id','product_id','user_id','rating','comment','crated_at','updated_at']
-
