@@ -161,10 +161,10 @@ class OrderSerializer(serializers.ModelSerializer):
 class AddOrderSerializer(serializers.Serializer):
     cart_id = serializers.UUIDField()
 
-    def save(self, **kwargs):
+    def save(self,user, **kwargs):
         with transaction.atomic():
             cart_id = self.validated_data['cart_id']
-            (customer, created) = settings.AUTH_USER_MODEL.objects.get_or_create(user_id=self.context['user_id'])
+            (customer, created) = Customer.objects.get_or_create(user=user)
             order = Order.objects.create(customer=customer)
 
             cart_items = CartItem.objects.select_related('product').filter(cart_id=cart_id)

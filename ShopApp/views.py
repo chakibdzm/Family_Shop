@@ -201,9 +201,9 @@ class OrderViewSet(ModelViewSet):
         return OrderSerializer
 
     def create(self, request, *args, **kwargs):
-        serializer = AddOrderSerializer(data=request.data,context={'user_id': self.request.user.id})
+        serializer = AddOrderSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        order = serializer.save()
+        order = serializer.save(user=request.user)
         serializer = OrderSerializer(order)
         return Response(serializer.data)
     
