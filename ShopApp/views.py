@@ -239,7 +239,7 @@ class OrderViewSet(ModelViewSet):
 
 
 
-
+###########
 class PanierItemList(generics.ListAPIView):
     serializer_class = PanierItemSerializer
     permission_classes = [IsAuthenticated]
@@ -279,7 +279,7 @@ class RemoveFromPanier(generics.DestroyAPIView):
 
 
 
-
+#####
 class OrderView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -293,7 +293,7 @@ class OrderView(APIView):
 
 
 
- 
+ ###
 class UserOrderListView(generics.ListAPIView):
     serializer_class = OrdersSerializer
     permission_classes = [IsAuthenticated]
