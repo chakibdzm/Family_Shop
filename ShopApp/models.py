@@ -226,7 +226,43 @@ class club_member(models.Model):
     
 
 class Favorite(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('user', 'product')
+
+
+class PanierItem(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+    date_added = models.DateTimeField(default=timezone.now)
+
+    def subtotal(self):
+        return self.quantity * self.price
+
+    def __str__(self):
+        return f'{self.quantity} x {self.product.title}'
+    
+
+
+
+
+class Orders(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    items = models.ManyToManyField('PanierItem')
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def total(self):
+        return sum(item.subtotal() for item in self.items.all())    
+
+    def __str__(self) -> str:
+        return str(self.user) 
+    
+    
+
+
 
 

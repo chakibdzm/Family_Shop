@@ -10,7 +10,7 @@ router.register('customers', views.CustomerViewSet)
 router.register('Categories', views.CollectionViewSet)
 router.register('carts', views.CartViewSet)
 router.register(r'clothes',views.ClotheViewSet)
-router.register('orders',views.OrderViewSet)
+
 
 
 carts_router = NestedDefaultRouter(router, 'carts', lookup = 'cart')
@@ -26,6 +26,12 @@ urlpatterns = router.urls+carts_router.urls+[
     path('favorites/<int:pk>/', FavoriteDetail.as_view(), name='favorite_detail'), 
     path('cart_confirmed/<int:cart_id>/', views.OrderViewSet.as_view({'post': 'create'})), 
     path('comments/create/', CommentCreateAPIView.as_view(), name='comment-create'), 
+    path('panier/', PanierItemList.as_view()),
+    path('panier/add/', AddToPanier.as_view()),
+    path('panier/remove/<int:pk>/', RemoveFromPanier.as_view()),
+    path('ordering/', OrderView.as_view(), name='order-list'),
+    path('order/', UserOrderListView.as_view(), name='user-order-list'),
+    
     
     ]
 
