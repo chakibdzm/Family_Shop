@@ -30,7 +30,6 @@ def product_collection(request, category_name):
     serializer=ProductSerializer(products,many=True)
     return Response(serializer.data)
 
-
 class CommentCreateAPIView(generics.CreateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer

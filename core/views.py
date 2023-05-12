@@ -4,6 +4,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+
 from core.models import User
 from .serializers import UserSerializer
 
@@ -67,3 +68,5 @@ class LogoutView(APIView):
             'message': 'Logged out.'
         }  
         return response  
+
+
