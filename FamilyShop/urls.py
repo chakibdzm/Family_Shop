@@ -61,6 +61,7 @@ urlpatterns += [
     path('user', UserView.as_view())
 ]
 
+
 # User urls
 urlpatterns += router.urls
 

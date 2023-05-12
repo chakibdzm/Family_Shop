@@ -4,6 +4,7 @@ from django.db import models
 from uuid import uuid4
 from django.contrib import admin
 from django.utils import timezone
+
 #from datetime import timedelta
 class ProductAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
@@ -14,12 +15,6 @@ class ProductAdmin(admin.ModelAdmin):
     archive_selected_products.short_description = "Archive selected products"
     actions = [archive_selected_products]
     list_display = ['title', 'is_archived']
-
-    
-
-
-
-
 
 
 
@@ -40,12 +35,7 @@ class Collection(models.Model):
 class Sub_collection(models.Model):
     title=models.CharField(max_length=255)
     parent_collection=models.ForeignKey(Collection, on_delete=models.CASCADE, related_name='subcollections')
-    
-
-    
-    
-
-   
+      
     def __str__(self) ->str:
         return self.title
 #
@@ -231,5 +221,69 @@ class club_member(models.Model):
 class Favorite(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class product_clothes_men(models.Model):
+    title = models.CharField(max_length=255)
+    price = models.CharField(max_length=10)
+    colors = models.CharField(max_length=255)
+    src_image = models.CharField(max_length=255)
+    alt_image = models.CharField(max_length=255)
+    promotion_status = models.SmallIntegerField()
+    discount_percentage = models.IntegerField()
+    quantity = models.IntegerField()
+    taille = models.CharField(max_length=255)
+    description = models.TextField()
+
+class product_clothes_men(models.Model):
+    title = models.CharField(max_length=255)
+    price = models.CharField(max_length=10)
+    colors = models.CharField(max_length=255)
+    src_image = models.CharField(max_length=255)
+    alt_image = models.CharField(max_length=255)
+    promotion_status = models.SmallIntegerField()
+    discount_percentage = models.IntegerField()
+    quantity = models.IntegerField()
+    taille = models.CharField(max_length=255)
+    description = models.TextField()    
+
+
+class product_clothes_women(models.Model):
+    title = models.CharField(max_length=255)
+    price = models.CharField(max_length=10)
+    colors = models.CharField(max_length=255)
+    src_image = models.CharField(max_length=255)
+    alt_image = models.CharField(max_length=255)
+    promotion_status = models.SmallIntegerField()
+    discount_percentage = models.IntegerField()
+    quantity = models.IntegerField()
+    taille = models.CharField(max_length=255)
+    description = models.TextField()    
+
+
+class product_clothes_kids(models.Model):
+    title = models.CharField(max_length=255)
+    price = models.CharField(max_length=10)
+    colors = models.CharField(max_length=255)
+    src_image = models.CharField(max_length=255)
+    alt_image = models.CharField(max_length=255)
+    promotion_status = models.SmallIntegerField()
+    discount_percentage = models.IntegerField()
+    quantity = models.IntegerField()
+    taille = models.CharField(max_length=255)
+    description = models.TextField()
+
+
+class product_clothes_chaussures(models.Model):
+    title = models.CharField(max_length=255)
+    price = models.CharField(max_length=10)
+    colors = models.CharField(max_length=255)
+    src_image = models.CharField(max_length=255)
+    alt_image = models.CharField(max_length=255)
+    promotion_status = models.SmallIntegerField()
+    discount_percentage = models.IntegerField()
+    quantity = models.IntegerField()
+    pointure = models.CharField(max_length=255)
+    description = models.TextField() 
 
 

@@ -192,3 +192,24 @@ class FavoriteSerializer(serializers.ModelSerializer):
         fields = ('id', 'product', 'created_at')
 
     
+class ProductClothesMenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = product_clothes_men
+        fields = ('id', 'title', 'price', 'colors', 'src_image', 'alt_image', 'promotion_status', 'discount_percentage', 'quantity', 'taille', 'description')
+
+
+class ShopappProductClothesWomenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = product_clothes_women
+        fields = ('id', 'title', 'price', 'colors', 'src_image', 'alt_image', 'promotion_status', 'discount_percentage', 'quantity', 'taille', 'description')
+
+class ShopappProductClothesKidsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = product_clothes_kids
+        fields = ('id', 'title', 'price', 'colors', 'src_image', 'alt_image', 'promotion_status', 'discount_percentage', 'quantity', 'taille', 'description')
+   
+class ProductClothesChaussuresSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = product_clothes_chaussures
+        fields = ('id', 'title', 'price', 'colors', 'src_image', 'alt_image', 'promotion_status', 'discount_percentage', 'quantity', 'pointure', 'description')
+        

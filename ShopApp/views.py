@@ -220,3 +220,19 @@ class OrderViewSet(ModelViewSet):
         if user.is_staff:
             return Order.objects.all()
  
+
+class ShopappProductClothesMenViewSet(ModelViewSet):
+    serializer_class = ProductClothesMenSerializer
+    queryset = product_clothes_men.objects.all()
+
+class ShopappProductClothesWomenViewSet(ModelViewSet):
+    serializer_class = ShopappProductClothesWomenSerializer
+    queryset = product_clothes_women.objects.all()
+
+class ShopappProductClothesKidsViewSet(ModelViewSet):
+    serializer_class = ShopappProductClothesKidsSerializer
+    queryset = product_clothes_kids.objects.all()
+    
+class ShopappProductClothesChaussuresViewSet(ModelViewSet):
+    serializer_class = ProductClothesChaussuresSerializer
+    queryset = product_clothes_chaussures.objects.all()      

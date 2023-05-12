@@ -11,6 +11,10 @@ router.register('Categories', views.CollectionViewSet)
 router.register('carts', views.CartViewSet)
 router.register(r'clothes',views.ClotheViewSet)
 router.register('orders',views.OrderViewSet)
+router.register(r'product_clothes_men', ShopappProductClothesMenViewSet)
+router.register(r'product_clothes_women', ShopappProductClothesWomenViewSet)
+router.register(r'product_clothes_kids', ShopappProductClothesKidsViewSet)
+router.register(r'product_clothes_chaussures', ShopappProductClothesChaussuresViewSet)
 
 
 carts_router = NestedDefaultRouter(router, 'carts', lookup = 'cart')
