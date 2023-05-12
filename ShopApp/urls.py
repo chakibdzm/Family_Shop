@@ -10,7 +10,7 @@ router.register('customers', views.CustomerViewSet)
 router.register('Categories', views.CollectionViewSet)
 router.register('carts', views.CartViewSet)
 router.register(r'clothes',views.ClotheViewSet)
-router.register('orders',views.OrderViewSet)
+
 
 
 carts_router = NestedDefaultRouter(router, 'carts', lookup = 'cart')
@@ -31,6 +31,7 @@ urlpatterns = router.urls+carts_router.urls+[
     path('panier/remove/<int:pk>/', RemoveFromPanier.as_view()),
     path('ordering/', OrderView.as_view(), name='order-list'),
     path('order/', UserOrderListView.as_view(), name='user-order-list'),
+    
     
     ]
 

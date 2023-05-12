@@ -189,7 +189,7 @@ class CustomerSerializer(serializers.ModelSerializer):
 class FavoriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favorite
-        fields = ('id', 'product', 'created_at')
+        fields = ('id', 'product','user')
 
 
 

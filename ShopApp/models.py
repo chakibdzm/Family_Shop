@@ -226,8 +226,11 @@ class club_member(models.Model):
     
 
 class Favorite(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('user', 'product')
 
 
 class PanierItem(models.Model):
@@ -241,7 +244,7 @@ class PanierItem(models.Model):
         return self.quantity * self.price
 
     def __str__(self):
-        return f'{self.quantity} x {self.product.name}'
+        return f'{self.quantity} x {self.product.title}'
     
 
 
@@ -257,7 +260,7 @@ class Orders(models.Model):
 
     def __str__(self) -> str:
         return str(self.user) 
-
+    
     
 
 

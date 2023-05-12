@@ -179,15 +179,29 @@ class CartItemViewSet(ModelViewSet):
     
 
 
+
 class FavoriteList(generics.ListCreateAPIView):
     serializer_class = FavoriteSerializer
-    queryset=Favorite.objects.all() 
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return Favorite.objects.filter(user=self.request.user)
+
 
 
 class FavoriteDetail(generics.RetrieveDestroyAPIView):
     serializer_class = FavoriteSerializer
-    #permission_classes = (permissions.IsAuthenticated,)
-    queryset = Favorite.objects.all()
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return Favorite.objects.filter(user=self.request.user)
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, product=self.kwargs['pk'])
+        return obj
+    
+    
 
     
 
@@ -276,7 +290,10 @@ class OrderView(APIView):
         order = Orders.objects.create(user=user)
         order.items.set(cart_items)
         order_serializer = OrdersSerializer(order)
-        return Response(order_serializer.data, status=status.HTTP_201_CREATED)     
+        return Response(order_serializer.data, status=status.HTTP_201_CREATED)  
+
+
+
  
 class UserOrderListView(generics.ListAPIView):
     serializer_class = OrdersSerializer
@@ -285,3 +302,12 @@ class UserOrderListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return Orders.objects.filter(user=user)
+    
+
+
+
+
+
+
+
+    
