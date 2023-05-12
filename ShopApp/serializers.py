@@ -211,4 +211,14 @@ class AddToPanierSerializer(serializers.Serializer):
     product_id = serializers.IntegerField()
     quantity = serializers.IntegerField(min_value=1)
 
+
+
+
+
+class OrdersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Orders
+        fields = ['id', 'user', 'items', 'created_at', 'total']
+        read_only_fields = ['created_at', 'total']    
+
     

@@ -242,9 +242,23 @@ class PanierItem(models.Model):
 
     def __str__(self):
         return f'{self.quantity} x {self.product.name}'
+    
 
 
 
+
+class Orders(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    items = models.ManyToManyField('PanierItem')
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def total(self):
+        return sum(item.subtotal() for item in self.items.all())    
+
+    def __str__(self) -> str:
+        return str(self.user) 
+
+    
 
 
 

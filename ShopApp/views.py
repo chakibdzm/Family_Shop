@@ -262,5 +262,26 @@ class AddToPanier(generics.CreateAPIView):
 class RemoveFromPanier(generics.DestroyAPIView):
     queryset = PanierItem.objects.all()
     serializer_class = PanierItemSerializer
-    permission_classes = [IsAuthenticated]        
+    permission_classes = [IsAuthenticated]       
+
+
+
+
+class OrderView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        cart_items = PanierItem.objects.filter(user=user)
+        order = Orders.objects.create(user=user)
+        order.items.set(cart_items)
+        order_serializer = OrdersSerializer(order)
+        return Response(order_serializer.data, status=status.HTTP_201_CREATED)     
  
+class UserOrderListView(generics.ListAPIView):
+    serializer_class = OrdersSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Orders.objects.filter(user=user)

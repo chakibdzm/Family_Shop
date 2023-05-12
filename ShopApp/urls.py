@@ -29,6 +29,8 @@ urlpatterns = router.urls+carts_router.urls+[
     path('panier/', PanierItemList.as_view()),
     path('panier/add/', AddToPanier.as_view()),
     path('panier/remove/<int:pk>/', RemoveFromPanier.as_view()),
+    path('ordering/', OrderView.as_view(), name='order-list'),
+    path('order/', UserOrderListView.as_view(), name='user-order-list'),
     
     ]
 
