@@ -219,4 +219,48 @@ class OrderViewSet(ModelViewSet):
         user = self.request.user
         if user.is_staff:
             return Order.objects.all()
+        
+
+
+
+
+
+
+
+class PanierItemList(generics.ListAPIView):
+    serializer_class = PanierItemSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return PanierItem.objects.filter(user=self.request.user)
+
+class AddToPanier(generics.CreateAPIView):
+    serializer_class = AddToPanierSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        product = Product.objects.get(id=serializer.validated_data['product_id'])
+        quantity = serializer.validated_data['quantity']
+        price = product.unit_price
+
+        cart_item, created = PanierItem.objects.get_or_create(
+            user=request.user,
+            product=product,
+            defaults={'quantity': quantity, 'price': price}
+        )
+
+        if not created:
+            cart_item.quantity += quantity
+            cart_item.save()
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+class RemoveFromPanier(generics.DestroyAPIView):
+    queryset = PanierItem.objects.all()
+    serializer_class = PanierItemSerializer
+    permission_classes = [IsAuthenticated]        
  

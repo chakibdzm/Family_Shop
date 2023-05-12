@@ -230,3 +230,22 @@ class Favorite(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
+class PanierItem(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+    date_added = models.DateTimeField(default=timezone.now)
+
+    def subtotal(self):
+        return self.quantity * self.price
+
+    def __str__(self):
+        return f'{self.quantity} x {self.product.name}'
+
+
+
+
+
+
+
