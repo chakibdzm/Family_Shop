@@ -282,7 +282,6 @@ class AddToPanier(generics.CreateAPIView):
         product = Product.objects.get(id=serializer.validated_data['product_id'])
         quantity = serializer.validated_data['quantity']
         price = product.unit_price
-
         token = request.COOKIES.get('jwt')
 
         if not token:
