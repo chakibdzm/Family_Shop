@@ -41,14 +41,13 @@ class CommentCreateAPIView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         token = self.request.COOKIES.get('jwt')
-
         if not token:
-            raise AuthenticationFailed('Unauthenticated!')
+            raise AuthenticationFailed('Unauthenticated! : no token found')
 
         try:
             payload = jwt.decode(token, 'secret', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated!')
+            raise AuthenticationFailed('Unauthenticated! token expired')
 
         user=User.objects.get(id=payload['id'])
         serializer.save(user=user)
