@@ -19,6 +19,10 @@ from rest_framework.mixins import CreateModelMixin,RetrieveModelMixin,UpdateMode
 from rest_framework.permissions import IsAuthenticated,AllowAny,IsAdminUser
 from .permissions import IsAdminOrReadOnly
 from rest_framework import status
+import jwt
+from rest_framework.exceptions import AuthenticationFailed
+from core.models import User
+
 from rest_framework.parsers import MultiPartParser, FormParser
 
 #
@@ -33,10 +37,22 @@ def product_collection(request, category_name):
 class CommentCreateAPIView(generics.CreateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticated]
+    
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        token = self.request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        user=User.objects.get(id=payload['id'])
+        serializer.save(user=user)
+
 
 
 class ClotheViewSet(ModelViewSet):
@@ -161,7 +177,7 @@ class CustomerViewSet(ModelViewSet):
     
 class CartItemViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
-    #permission_classes=[IsAuthenticated]
+    
     def get_serializer_context(self):
         return {'cart_id': self.kwargs['cart_pk']}
 
@@ -179,31 +195,30 @@ class CartItemViewSet(ModelViewSet):
 
 
 
-class FavoriteList(generics.ListCreateAPIView):
+class FavoriteViewSet(ModelViewSet):
     serializer_class = FavoriteSerializer
-    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return Favorite.objects.filter(user=self.request.user)
+        token = self.request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        user_id = payload['id']
+        favorites = Favorite.objects.filter(user_id=user_id)
 
 
+        id = self.kwargs.get('id')
+        if id:
+            favorites = favorites.filter(id=id)
 
-class FavoriteDetail(generics.RetrieveDestroyAPIView):
-    serializer_class = FavoriteSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def get_queryset(self):
-        return Favorite.objects.filter(user=self.request.user)
-
-    def get_object(self):
-        queryset = self.get_queryset()
-        obj = get_object_or_404(queryset, product=self.kwargs['pk'])
-        return obj
+        return favorites
     
-    
-
-    
-
 
 class OrderViewSet(ModelViewSet):
     #permission_classes = [IsAuthenticated]
@@ -234,22 +249,31 @@ class OrderViewSet(ModelViewSet):
             return Order.objects.all()
         
 
-
-
-
-
-
-###########
 class PanierItemList(generics.ListAPIView):
     serializer_class = PanierItemSerializer
-    permission_classes = [IsAuthenticated]
-
     def get_queryset(self):
-        return PanierItem.objects.filter(user=self.request.user)
+        
+        token = self.request.COOKIES.get('jwt')
 
+        if not token:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        user_id = payload['id']
+        panier = PanierItem.objects.filter(user_id=user_id)
+
+        id = self.kwargs.get('id')
+        if id:
+            panier = panier.filter(id=id)
+
+        return panier
+    
 class AddToPanier(generics.CreateAPIView):
     serializer_class = AddToPanierSerializer
-    permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -258,9 +282,21 @@ class AddToPanier(generics.CreateAPIView):
         product = Product.objects.get(id=serializer.validated_data['product_id'])
         quantity = serializer.validated_data['quantity']
         price = product.unit_price
+        token = request.COOKIES.get('jwt')
 
+        if not token:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        user = User.objects.filter(id=payload['id']).first()
+
+        
         cart_item, created = PanierItem.objects.get_or_create(
-            user=request.user,
+            user=user,
             product=product,
             defaults={'quantity': quantity, 'price': price}
         )
@@ -273,35 +309,74 @@ class AddToPanier(generics.CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class RemoveFromPanier(generics.DestroyAPIView):
-    queryset = PanierItem.objects.all()
+    
     serializer_class = PanierItemSerializer
-    permission_classes = [IsAuthenticated]       
 
+    def get_object(self):
+        product_id = self.kwargs['product_id']
+        # Get the authenticated user
+        token = self.request.COOKIES.get('jwt')
 
+        if not token:
+            raise AuthenticationFailed('Unauthenticated!')
 
-#####
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        user = User.objects.filter(id=payload['id']).first()
+        cart_item = PanierItem.objects.filter(user=user, product_id=product_id).first()
+        if not cart_item:
+            raise NotFound('Item not found in cart!')
+        return cart_item
+    
 class OrderView(APIView):
-    permission_classes = [IsAuthenticated]
+   
 
     def post(self, request):
-        user = request.user
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed('Unauthenticated !')
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Unauthenticated !')    
+
+        user = User.objects.get(id=payload['id'])
         cart_items = PanierItem.objects.filter(user=user)
         order = Orders.objects.create(user=user)
         order.items.set(cart_items)
         order_serializer = OrdersSerializer(order)
         return Response(order_serializer.data, status=status.HTTP_201_CREATED)  
 
-
-
- ###
 class UserOrderListView(generics.ListAPIView):
     serializer_class = OrdersSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
-        return Orders.objects.filter(user=user)
+        token = self.request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        user_id = payload['id']
+        order = Orders.objects.filter(user_id=user_id)
+
+        id = self.kwargs.get('id')
+        if id:
+            order = order.filter(id=id)
+
+        return order
     
+
+
+
 
 
 
