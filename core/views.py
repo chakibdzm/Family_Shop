@@ -38,17 +38,16 @@ class LoginView(APIView):
 
         response = Response()
 
+        response.set_cookie(key='jwt', value=token, httponly=True)
         response.data = {
             'jwt': token
         }
-        
-        response['Authorization'] = f'Bearer {token}'
         
         return response
 
 class UserView(APIView):
     def get(self, request):
-        token = self.request.headers.get('Authorization', '').split(' ')[1]
+        token = request.COOKIES.get('jwt')
 
         if not token:
             raise AuthenticationFailed('Unauthenticated !')
