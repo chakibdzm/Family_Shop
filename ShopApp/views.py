@@ -40,7 +40,7 @@ class CommentCreateAPIView(generics.CreateAPIView):
     
 
     def perform_create(self, serializer):
-        token = self.request.COOKIES.get('jwt')
+        token = self.request.headers.get('Authorization', '').split(' ')[1]
         if not token:
             raise AuthenticationFailed('Unauthenticated! : no token found')
 
