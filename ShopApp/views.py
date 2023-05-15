@@ -197,7 +197,7 @@ class FavoriteViewSet(ModelViewSet):
     serializer_class = FavoriteSerializer
 
     def get_queryset(self):
-        token = self.request.COOKIES.get('jwt')
+        token = self.request.headers.get('Authorization', '').split(' ')[1]
 
         if not token:
             raise AuthenticationFailed('Unauthenticated!')
@@ -251,7 +251,7 @@ class PanierItemList(generics.ListAPIView):
     serializer_class = PanierItemSerializer
     def get_queryset(self):
         
-        token = self.request.COOKIES.get('jwt')
+        token = self.request.headers.get('Authorization', '').split(' ')[1]
 
         if not token:
             raise AuthenticationFailed('Unauthenticated!')
@@ -280,7 +280,7 @@ class AddToPanier(generics.CreateAPIView):
         product = Product.objects.get(id=serializer.validated_data['product_id'])
         quantity = serializer.validated_data['quantity']
         price = product.unit_price
-        token = request.COOKIES.get('jwt')
+        token = self.request.headers.get('Authorization', '').split(' ')[1]
 
         if not token:
             raise AuthenticationFailed('Unauthenticated!')
@@ -313,7 +313,7 @@ class RemoveFromPanier(generics.DestroyAPIView):
     def get_object(self):
         product_id = self.kwargs['product_id']
         # Get the authenticated user
-        token = self.request.COOKIES.get('jwt')
+        token = self.request.headers.get('Authorization', '').split(' ')[1]
 
         if not token:
             raise AuthenticationFailed('Unauthenticated!')
@@ -333,7 +333,7 @@ class OrderView(APIView):
    
 
     def post(self, request):
-        token = request.COOKIES.get('jwt')
+        token = self.request.headers.get('Authorization', '').split(' ')[1]
 
         if not token:
             raise AuthenticationFailed('Unauthenticated !')
@@ -353,7 +353,7 @@ class UserOrderListView(generics.ListAPIView):
     serializer_class = OrdersSerializer
 
     def get_queryset(self):
-        token = self.request.COOKIES.get('jwt')
+        token = self.request.headers.get('Authorization', '').split(' ')[1]
 
         if not token:
             raise AuthenticationFailed('Unauthenticated!')
