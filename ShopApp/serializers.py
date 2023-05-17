@@ -189,9 +189,11 @@ class CustomerSerializer(serializers.ModelSerializer):
 class FavoriteSerializer(serializers.ModelSerializer):
     prod_price=serializers.ReadOnlyField()
     prod_name=serializers.ReadOnlyField()
+    prod_description=serializers.ReadOnlyField()
+    prod_quantity=serializers.ReadOnlyField()
     class Meta:
         model = Favorite
-        fields = ('id', 'product','prod_name','prod_price','user')
+        fields = ('id', 'product','prod_name','prod_price','prod_description','prod_quantity','user')
 
 
 

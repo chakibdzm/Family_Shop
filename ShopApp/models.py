@@ -237,6 +237,10 @@ class Favorite(models.Model):
         return self.product.title
     def prod_price(self):
         return self.product.unit_price
+    def prod_description(self):
+        return self.product.description
+    def prod_quantity(self):
+        return self.product.inventory
 
 class PanierItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
