@@ -187,9 +187,11 @@ class CustomerSerializer(serializers.ModelSerializer):
         fields = ['id','user_id','phone', 'birth_date', 'membership', ]  
 
 class FavoriteSerializer(serializers.ModelSerializer):
+    prod_price=serializers.ReadOnlyField()
+    prod_name=serializers.ReadOnlyField()
     class Meta:
         model = Favorite
-        fields = ('id', 'product','user')
+        fields = ('id', 'product','prod_name','prod_price','user')
 
 
 
@@ -199,13 +201,11 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 
 class PanierItemSerializer(serializers.ModelSerializer):
-    product_name = serializers.ReadOnlyField(source='product.name')
-    product_price = serializers.ReadOnlyField(source='product.price')
     subtotal = serializers.ReadOnlyField()
-
+    product_name=serializers.ReadOnlyField()
     class Meta:
         model = PanierItem
-        fields = ['id', 'product', 'product_name', 'product_price', 'quantity', 'price', 'subtotal']
+        fields = ['id', 'product', 'product_name','quantity', 'price', 'subtotal']
 
 class AddToPanierSerializer(serializers.Serializer):
     product_id = serializers.IntegerField()
@@ -216,6 +216,8 @@ class AddToPanierSerializer(serializers.Serializer):
 
 
 class OrdersSerializer(serializers.ModelSerializer):
+    items = PanierItemSerializer(many=True, read_only=True)
+
     class Meta:
         model = Orders
         fields = ['id', 'user', 'items', 'created_at', 'total']

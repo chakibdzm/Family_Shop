@@ -190,12 +190,10 @@ class CartItemViewSet(ModelViewSet):
     def get_queryset(self):
         return CartItem.objects.filter(cart_id=self.kwargs['cart_pk'])
     
-
-
-
 class FavoriteViewSet(ModelViewSet):
     serializer_class = FavoriteSerializer
 
+    http_method_names=['get','post','delete']
     def get_queryset(self):
         token = self.request.headers.get('Authorization', '').split(' ')[1]
 
@@ -210,15 +208,16 @@ class FavoriteViewSet(ModelViewSet):
         user_id = payload['id']
         favorites = Favorite.objects.filter(user_id=user_id)
 
-
         id = self.kwargs.get('id')
         if id:
             favorites = favorites.filter(id=id)
-
         return favorites
+    
+    
     
 
 class OrderViewSet(ModelViewSet):
+
     #permission_classes = [IsAuthenticated]
     queryset= Order.objects.prefetch_related('items__product').all()
     def get_serializer_class(self):
@@ -246,9 +245,9 @@ class OrderViewSet(ModelViewSet):
         if user.is_staff:
             return Order.objects.all()
         
-
-class PanierItemList(generics.ListAPIView):
-    serializer_class = PanierItemSerializer
+class panierViewSet(ModelViewSet):
+    serializer_class=PanierItemSerializer
+    http_method_names=['get','delete']
     def get_queryset(self):
         
         token = self.request.headers.get('Authorization', '').split(' ')[1]
@@ -270,9 +269,10 @@ class PanierItemList(generics.ListAPIView):
 
         return panier
     
+
+
 class AddToPanier(generics.CreateAPIView):
     serializer_class = AddToPanierSerializer
-
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -306,28 +306,6 @@ class AddToPanier(generics.CreateAPIView):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-class RemoveFromPanier(generics.DestroyAPIView):
-    
-    serializer_class = PanierItemSerializer
-
-    def get_object(self):
-        product_id = self.kwargs['product_id']
-        # Get the authenticated user
-        token = self.request.headers.get('Authorization', '').split(' ')[1]
-
-        if not token:
-            raise AuthenticationFailed('Unauthenticated!')
-
-        try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated!')
-
-        user = User.objects.filter(id=payload['id']).first()
-        cart_item = PanierItem.objects.filter(user=user, product_id=product_id).first()
-        if not cart_item:
-            raise NotFound('Item not found in cart!')
-        return cart_item
     
 class OrderView(APIView):
    
