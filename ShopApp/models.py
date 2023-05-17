@@ -228,11 +228,15 @@ class club_member(models.Model):
 
 class Favorite(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,related_name='fav_product')
     
     class Meta:
         unique_together = ('user', 'product')
 
+    def prod_name(self):
+        return self.product.title
+    def prod_price(self):
+        return self.product.unit_price
 
 class PanierItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -243,11 +247,14 @@ class PanierItem(models.Model):
 
     def subtotal(self):
         return self.quantity * self.price
+    
+    def product_name(self):
+        return self.product.title
 
     def __str__(self):
         return f'{self.quantity} x {self.product.title}'
     
-
+    
 
 
 
@@ -261,6 +268,13 @@ class Orders(models.Model):
 
     def __str__(self) -> str:
         return str(self.user) 
+    
+    def get_items_by_product_name(self,product_name):
+        return self.items.filter(product__product__title=product_name)
+    
+
+    
+    
     
     
 

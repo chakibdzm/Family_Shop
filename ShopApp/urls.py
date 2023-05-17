@@ -9,6 +9,7 @@ router.register('products', views.ProductViewSet)
 router.register('Categories', views.CollectionViewSet)
 router.register(r'clothes',views.ClotheViewSet)
 router.register('favorites', FavoriteViewSet,basename='favorites')
+router.register('panier',views.panierViewSet,basename='panier')
 
 
 
@@ -19,9 +20,7 @@ urlpatterns = router.urls+[
     path('products/collection/<str:category_name>/', product_collection),
     path('clothes/collection/<str:category_name>/',views.ClotheViewSet.as_view({'get': 'clothes_collection'}), name='clothes-collection'),  
     path('comments/create/', CommentCreateAPIView.as_view(), name='comment-create'), 
-    path('panier/', PanierItemList.as_view()),
-    path('panier/add/', AddToPanier.as_view()),
-    path('panier/remove/<int:product_id>/', RemoveFromPanier.as_view()),
+    path('panier_add', AddToPanier.as_view()),
     path('ordering/', OrderView.as_view(), name='order-list'),
     path('order/', UserOrderListView.as_view(), name='user-order-list'),
     
