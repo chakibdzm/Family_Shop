@@ -28,7 +28,7 @@ class SubCollectionSerializer(serializers.ModelSerializer):
         model=Sub_collection
         fields=['id','parent_collection','title']
     products_count = serializers.IntegerField(read_only=True)
-
+'''
 class ClothesSerializer(serializers.ModelSerializer):
     sub_collection_name = serializers.SerializerMethodField(method_name="get_collection_name")
     class Meta:
@@ -38,7 +38,9 @@ class ClothesSerializer(serializers.ModelSerializer):
 
     
     def get_collection_name(self, obj):
-        return obj.get_collection_name()
+        return obj.get_collection_name()'''
+
+
 ##
 class ProductSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
@@ -60,6 +62,13 @@ class ProductSerializer(serializers.ModelSerializer):
         for image in uploaded_images:
             newproduct_image = ProImage.objects.create(product=product, image=image)
         return product
+
+    
+class ClothesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Clothes
+        fields = '__all__'
 
     
 

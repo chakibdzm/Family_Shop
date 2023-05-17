@@ -52,6 +52,9 @@ class Product(models.Model):
     is_archived = models.BooleanField(default=False)
     taille = models.CharField(max_length=255)
     colors = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
     
 
 class ProImage(models.Model):

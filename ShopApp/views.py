@@ -39,7 +39,7 @@ class CommentCreateAPIView(generics.CreateAPIView):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-
+'''
 class ClothesViewSet(ModelViewSet):
     queryset = Clothes.objects.all()
     serializer_class = ClothesSerializer
@@ -52,7 +52,11 @@ class ClothesViewSet(ModelViewSet):
             queryset = queryset.filter(gender=gender)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+'''
 
+class ClothesViewSet(ModelViewSet):
+    queryset = Clothes.objects.all()
+    serializer_class = ClothesSerializer
 
 
 class ProductDetail(generics.RetrieveAPIView):
