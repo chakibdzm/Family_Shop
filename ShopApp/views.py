@@ -34,6 +34,8 @@ def product_collection(request, category_name):
     serializer=ProductSerializer(products,many=True)
     return Response(serializer.data)
 
+
+
 class CommentCreateAPIView(generics.CreateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
@@ -213,6 +215,32 @@ class FavoriteViewSet(ModelViewSet):
             favorites = favorites.filter(id=id)
         return favorites
     
+    def destroy(self, request, *args, **kwargs):
+        
+        product_id = self.kwargs.get('product_id')
+        if not product_id:
+            raise NotFound()
+
+        token = self.request.headers.get('Authorization', '').split(' ')[1]
+
+        if not token:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        user_id = payload['id']
+
+        favorites = Favorite.objects.filter(user_id=user_id, product_id=product_id)
+        if not favorites.exists():
+            raise NotFound()
+
+        favorites.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
     
     
 
@@ -247,9 +275,8 @@ class OrderViewSet(ModelViewSet):
         
 class panierViewSet(ModelViewSet):
     serializer_class=PanierItemSerializer
-    http_method_names=['get','delete']
+    http_method_names=['get','delete','put']
     def get_queryset(self):
-        
         token = self.request.headers.get('Authorization', '').split(' ')[1]
 
         if not token:
@@ -269,7 +296,69 @@ class panierViewSet(ModelViewSet):
 
         return panier
     
+    def destroy(self, request, *args, **kwargs):
+        token = self.request.headers.get('Authorization', '').split(' ')[1]
 
+        if not token:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        user_id = payload['id']
+        queryset = PanierItem.objects.filter(user_id=user_id)
+
+        id_prod = kwargs.get('id')
+        if not id_prod:
+            return Response({'error': 'Product ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            product = Product.objects.get(id=id_prod)
+        except Product.DoesNotExist:
+            return Response({'error': 'Product not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        panier_item = queryset.filter(product=product).first()
+        if panier_item is None:
+            return Response({'error': 'Product not found in panier.'}, status=status.HTTP_404_NOT_FOUND)
+
+        panier_item.delete()
+        return Response({'success': 'Product removed from panier.'}, status=status.HTTP_204_NO_CONTENT)
+    
+    
+    def update(self, request, *args, **kwargs):
+        token = self.request.headers.get('Authorization', '').split(' ')[1]
+
+        if not token:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        user_id = payload['id']
+        queryset = PanierItem.objects.filter(user_id=user_id)
+
+        id_prod = kwargs.get('id')
+        if not id_prod:
+            return Response({'error': 'Product ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            product = Product.objects.get(id=id_prod)
+        except Product.DoesNotExist:
+            return Response({'error': 'Product not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        panier_item = queryset.filter(product=product).first()
+        if panier_item is None:
+            return Response({'error': 'Product not found in panier.'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.get_serializer(panier_item, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
 
 class AddToPanier(generics.CreateAPIView):
     serializer_class = AddToPanierSerializer

@@ -20,9 +20,12 @@ urlpatterns = router.urls+[
     path('products/collection/<str:category_name>/', product_collection),
     path('clothes/collection/<str:category_name>/',views.ClotheViewSet.as_view({'get': 'clothes_collection'}), name='clothes-collection'),  
     path('comments/create/', CommentCreateAPIView.as_view(), name='comment-create'), 
-    path('panier_add', AddToPanier.as_view()),
+    path('panier_add/', AddToPanier.as_view()),
+    path('panier_remove/<int:id>/', panierViewSet.as_view({'delete': 'destroy'})),
+    path('panier_update/<int:id>/', panierViewSet.as_view({'put': 'update'})),
     path('ordering/', OrderView.as_view(), name='order-list'),
     path('order/', UserOrderListView.as_view(), name='user-order-list'),
+    path('favorites_remove/<int:product_id>/', FavoriteViewSet.as_view({'delete': 'destroy'}), name='favorite-delete'),
     
     
     ]
