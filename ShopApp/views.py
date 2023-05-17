@@ -40,7 +40,7 @@ class CommentCreateAPIView(generics.CreateAPIView):
         serializer.save(user=self.request.user)
 
 
-class ClotheViewSet(ModelViewSet):
+class ClothesViewSet(ModelViewSet):
     queryset = Clothes.objects.all()
     serializer_class = ClothesSerializer
      
@@ -70,16 +70,6 @@ class ProductDetail(generics.RetrieveAPIView):
         context['request'] = self.request
         return context
 
-    
-class ClothesViewSet(ModelViewSet):
-    queryset=Clothes.objects.all()
-    serializer_class=ClothesSerializer
-    filter_backends=(DjangoFilterBackend,SearchFilter,OrderingFilter)
-    filterset_fields=['gender']
-    
-
-    def get_serializer_context(self):
-        return {'request': self.request}
 
 class CategoryDetail(APIView):
     def get(self, request,category_id):
@@ -99,8 +89,6 @@ class ProductViewSet(ModelViewSet):
     parser_classes = (MultiPartParser, FormParser)
     filter_backends=(DjangoFilterBackend,SearchFilter,OrderingFilter)
     filterset_fields=['collection']
-    search_fields=['title']
-    OrderingFilter=['price_with_tax']
     permission_classes=[IsAdminOrReadOnly]
 
     #
@@ -221,17 +209,6 @@ class OrderViewSet(ModelViewSet):
             return Order.objects.all()
  
 
-class ShopappProductClothesMenViewSet(ModelViewSet):
-    serializer_class = ProductClothesMenSerializer
-    queryset = product_clothes_men.objects.all()
-
-class ShopappProductClothesWomenViewSet(ModelViewSet):
-    serializer_class = ShopappProductClothesWomenSerializer
-    queryset = product_clothes_women.objects.all()
-
-class ShopappProductClothesKidsViewSet(ModelViewSet):
-    serializer_class = ShopappProductClothesKidsSerializer
-    queryset = product_clothes_kids.objects.all()
     
 class ShopappProductClothesChaussuresViewSet(ModelViewSet):
     serializer_class = ProductClothesChaussuresSerializer

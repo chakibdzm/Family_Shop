@@ -34,35 +34,23 @@ class ClothesSerializer(serializers.ModelSerializer):
     class Meta:
 
         model=Clothes
-        fields=['id', 'title','gender', 'description', 'slug', 'inventory', 'unit_price','discounted_price', 'price_with_tax', 'sub_collection_name','tags']
+        fields='__all__'
 
     
-    price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax')
-    discounted_price = serializers.SerializerMethodField(method_name='get_discounted_price')
     def get_collection_name(self, obj):
         return obj.get_collection_name()
-    
-    def get_discounted_price(self, obj):
-        return obj.get_discounted_price()
-
-    def calculate_tax(self, product: Product):
-        return product.unit_price * Decimal(1.1)
 ##
 class ProductSerializer(serializers.ModelSerializer):
-    collection_name = serializers.SerializerMethodField(method_name="get_collection_name")
     comments = CommentSerializer(many=True, read_only=True)
     images = ProductImageSerializer(many=True, read_only=True)
     uploaded_images = serializers.ListField(
         child = serializers.ImageField(max_length = 1000000, allow_empty_file = False, use_url = False),
         write_only=True)
     
-    
 
     class Meta:
         model = Product
-        fields = ['id', 'title', 'description', 'slug', 'inventory', 'unit_price','discounted_price', 'price_with_tax', 'collection_name','tags','comments','images', 'uploaded_images']
-    price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax')
-    discounted_price = serializers.SerializerMethodField(method_name='get_discounted_price')
+        fields = '__all__'
     def get_collection_name(self, obj):
         return obj.get_collection_name()
     
@@ -73,12 +61,6 @@ class ProductSerializer(serializers.ModelSerializer):
             newproduct_image = ProImage.objects.create(product=product, image=image)
         return product
 
-   
-    def get_discounted_price(self, obj):
-        return obj.get_discounted_price()
-
-    def calculate_tax(self, product: Product):
-        return product.unit_price * Decimal(1.1)
     
 
 class CartProductSerializer(serializers.ModelSerializer):
@@ -192,21 +174,6 @@ class FavoriteSerializer(serializers.ModelSerializer):
         fields = ('id', 'product', 'created_at')
 
     
-class ProductClothesMenSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = product_clothes_men
-        fields = ('id', 'title', 'price', 'colors', 'src_image', 'alt_image', 'promotion_status', 'discount_percentage', 'quantity', 'taille', 'description')
-
-
-class ShopappProductClothesWomenSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = product_clothes_women
-        fields = ('id', 'title', 'price', 'colors', 'src_image', 'alt_image', 'promotion_status', 'discount_percentage', 'quantity', 'taille', 'description')
-
-class ShopappProductClothesKidsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = product_clothes_kids
-        fields = ('id', 'title', 'price', 'colors', 'src_image', 'alt_image', 'promotion_status', 'discount_percentage', 'quantity', 'taille', 'description')
    
 class ProductClothesChaussuresSerializer(serializers.ModelSerializer):
     class Meta:

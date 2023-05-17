@@ -9,11 +9,8 @@ router.register('products', views.ProductViewSet)
 router.register('customers', views.CustomerViewSet)
 router.register('Categories', views.CollectionViewSet)
 router.register('carts', views.CartViewSet)
-router.register(r'clothes',views.ClotheViewSet)
+router.register(r'clothes',views.ClothesViewSet)
 router.register('orders',views.OrderViewSet)
-router.register(r'product_clothes_men', ShopappProductClothesMenViewSet)
-router.register(r'product_clothes_women', ShopappProductClothesWomenViewSet)
-router.register(r'product_clothes_kids', ShopappProductClothesKidsViewSet)
 router.register(r'product_clothes_chaussures', ShopappProductClothesChaussuresViewSet)
 
 
@@ -25,7 +22,7 @@ carts_router.register('items', views.CartItemViewSet, basename='cart-items')
 urlpatterns = router.urls+carts_router.urls+[
     path('products/<int:product_id>',views.ProductDetail.as_view()),
     path('products/collection/<str:category_name>/', product_collection),
-    path('clothes/collection/<str:category_name>/',views.ClotheViewSet.as_view({'get': 'clothes_collection'}), name='clothes-collection'),  
+    path('clothes/collection/<str:category_name>/',views.ClothesViewSet.as_view({'get': 'clothes_collection'}), name='clothes-collection'),  
     path('favorites/', FavoriteList.as_view(), name='favorite_list'),
     path('favorites/<int:pk>/', FavoriteDetail.as_view(), name='favorite_detail'), 
     path('cart_confirmed/<int:cart_id>/', views.OrderViewSet.as_view({'post': 'create'})), 
