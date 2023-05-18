@@ -4,6 +4,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+
 from core.models import User
 from .serializers import UserSerializer
 
@@ -42,16 +43,17 @@ class LoginView(APIView):
 
         response = Response()
 
-        response.set_cookie(key='jwt', value=token, httponly=True)
         response.data = {
             'jwt': token
         }
+        
+        response['Authorization'] = f'Bearer {token}'
         
         return response
 
 class UserView(APIView):
     def get(self, request):
-        token = request.COOKIES.get('jwt')
+        token = self.request.headers.get('Authorization', '').split(' ')[1]
 
         if not token:
             raise AuthenticationFailed('Unauthenticated !')
@@ -72,3 +74,5 @@ class LogoutView(APIView):
             'message': 'Logged out.'
         }  
         return response  
+
+

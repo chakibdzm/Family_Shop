@@ -6,27 +6,27 @@ from rest_framework import routers
 from .views import *
 router = DefaultRouter()
 router.register('products', views.ProductViewSet)
-router.register('customers', views.CustomerViewSet)
 router.register('Categories', views.CollectionViewSet)
-router.register('carts', views.CartViewSet)
-router.register(r'clothes',views.ClothesViewSet)
-router.register('orders',views.OrderViewSet)
-router.register(r'product_clothes_chaussures', ShopappProductClothesChaussuresViewSet)
+router.register(r'clothes',views.ClotheViewSet)
+router.register('favorites', FavoriteViewSet,basename='favorites')
+router.register('panier',views.panierViewSet,basename='panier')
 
 
-carts_router = NestedDefaultRouter(router, 'carts', lookup = 'cart')
-carts_router.register('items', views.CartItemViewSet, basename='cart-items')
 
 
 # URLConf
-urlpatterns = router.urls+carts_router.urls+[
+urlpatterns = router.urls+[
     path('products/<int:product_id>',views.ProductDetail.as_view()),
     path('products/collection/<str:category_name>/', product_collection),
-    path('clothes/collection/<str:category_name>/',views.ClothesViewSet.as_view({'get': 'clothes_collection'}), name='clothes-collection'),  
-    path('favorites/', FavoriteList.as_view(), name='favorite_list'),
-    path('favorites/<int:pk>/', FavoriteDetail.as_view(), name='favorite_detail'), 
-    path('cart_confirmed/<int:cart_id>/', views.OrderViewSet.as_view({'post': 'create'})), 
+    path('clothes/collection/<str:category_name>/',views.ClotheViewSet.as_view({'get': 'clothes_collection'}), name='clothes-collection'),  
     path('comments/create/', CommentCreateAPIView.as_view(), name='comment-create'), 
+    path('panier_add/', AddToPanier.as_view()),
+    path('panier_remove/<int:id>/', panierViewSet.as_view({'delete': 'destroy'})),
+    path('panier_update/<int:id>/', panierViewSet.as_view({'put': 'update'})),
+    path('ordering/', OrderView.as_view(), name='order-list'),
+    path('order/', UserOrderListView.as_view(), name='user-order-list'),
+    path('favorites_remove/<int:product_id>/', FavoriteViewSet.as_view({'delete': 'destroy'}), name='favorite-delete'),
+    
     
     ]
 

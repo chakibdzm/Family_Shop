@@ -9,7 +9,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('id', 'product', 'user', 'text', 'created_at')
+        fields = ('id', 'product','user', 'user_id', 'text', 'created_at')
 
 class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -178,9 +178,51 @@ class CustomerSerializer(serializers.ModelSerializer):
         fields = ['id','user_id','phone', 'birth_date', 'membership', ]  
 
 class FavoriteSerializer(serializers.ModelSerializer):
+    prod_price=serializers.ReadOnlyField()
+    prod_name=serializers.ReadOnlyField()
+    prod_description=serializers.ReadOnlyField()
+    prod_quantity=serializers.ReadOnlyField()
     class Meta:
         model = Favorite
-        fields = ('id', 'product', 'created_at')
+        fields = ('id', 'product','prod_name','prod_price','prod_description','prod_quantity','user')
+
+
+
+
+
+
+
+
+class PanierItemSerializer(serializers.ModelSerializer):
+    subtotal = serializers.ReadOnlyField()
+    product_name=serializers.ReadOnlyField()
+    product_description=serializers.ReadOnlyField()
+    product_price=serializers.ReadOnlyField()
+    class Meta:
+        model = PanierItem
+        fields = ['product_id', 'product_name','product_description','quantity', 'product_price', 'subtotal']
+
+
+    def update(self, instance, validated_data):
+        instance.quantity = validated_data.get('quantity', instance.quantity)
+        instance.save()
+        return instance
+
+class AddToPanierSerializer(serializers.Serializer):
+    product_id = serializers.IntegerField()
+    quantity = serializers.IntegerField(min_value=1)
+
+
+
+
+
+class OrdersSerializer(serializers.ModelSerializer):
+    items = PanierItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Orders
+        fields = ['id', 'user', 'items', 'created_at', 'total']
+        read_only_fields = ['created_at', 'total']    
 
     
    
