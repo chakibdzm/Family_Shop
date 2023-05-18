@@ -12,6 +12,6 @@ admin.site.register(Collection)
 admin.site.register(Sub_collection)
 admin.site.register(Clothes)
 admin.site.register(Orders)
-
+admin.site.register(Notification)
 
 
