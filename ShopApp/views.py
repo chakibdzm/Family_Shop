@@ -72,6 +72,10 @@ class ClothesViewSet(ModelViewSet):
 class ClothesViewSet(ModelViewSet):
     queryset = Clothes.objects.all()
     serializer_class = ClothesSerializer
+    filter_backends=(DjangoFilterBackend,SearchFilter,OrderingFilter)
+    filterset_fields=['gender']
+    search_fields=['title']
+
 
 
 class ProductDetail(generics.RetrieveAPIView):
@@ -108,6 +112,7 @@ class ProductViewSet(ModelViewSet):
     parser_classes = (MultiPartParser, FormParser)
     filter_backends=(DjangoFilterBackend,SearchFilter,OrderingFilter)
     filterset_fields=['collection']
+    search_fields=['title']
     permission_classes=[IsAdminOrReadOnly]
 
     #
@@ -162,23 +167,7 @@ class CustomerViewSet(ModelViewSet):
             return Response(serializer.data)
 
 
-    
-class CartItemViewSet(ModelViewSet):
-    http_method_names = ['get', 'post', 'patch', 'delete']
-    
-    def get_serializer_context(self):
-        return {'cart_id': self.kwargs['cart_pk']}
-
-    @action(detail=False,methods=['POST','PATCH'],permission_classes=[IsAuthenticated])
-    def get_serializer_class(self):
-        if self.request.method == "POST":
-            return AddCartItemSerializer
-        elif self.request.method == "PATCH":
-            return UpdateCartItemSerializer
-        return CartItemSerializer
-    
-    def get_queryset(self):
-        return CartItem.objects.filter(cart_id=self.kwargs['cart_pk'])
+  
     
     
 class FavoriteViewSet(ModelViewSet):
@@ -231,34 +220,8 @@ class FavoriteViewSet(ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class OrderViewSet(ModelViewSet):
 
-    #permission_classes = [IsAuthenticated]
-    queryset= Order.objects.prefetch_related('items__product').all()
-    def get_serializer_class(self):
-        if self.request.method == "POST":
-            return AddOrderSerializer
-        return OrderSerializer
 
-    def create(self, request, *args, **kwargs):
-        serializer = AddOrderSerializer(data=request.data,context={'user_id': self.request.user.id})
-        serializer.is_valid(raise_exception=True)
-        order = serializer.save()
-        serializer = OrderSerializer(order)
-        return Response(serializer.data)
-    
-    #def destroy(self, request, *args, **kwargs):
-    #    instance = self.get_object()
-    #    if instance.is_deletable():
-    #        self.perform_destroy(instance)
-    #        return Response(status=status.HTTP_204_NO_CONTENT)
-    #    else:
-    #        return Response({'detail': 'This order cannot be deleted.'}, status=status.HTTP_403_FORBIDDEN)
-
-    def get_queryset(self):
-        user = self.request.user
-        if user.is_staff:
-            return Order.objects.all()
         
 class panierViewSet(ModelViewSet):
     serializer_class=PanierItemSerializer
@@ -355,7 +318,7 @@ class AddToPanier(generics.CreateAPIView):
 
         product = Product.objects.get(id=serializer.validated_data['product_id'])
         quantity = serializer.validated_data['quantity']
-        price = product.unit_price
+        price = product.price
         token = self.request.headers.get('Authorization', '').split(' ')[1]
 
         if not token:
