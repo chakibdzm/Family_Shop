@@ -54,7 +54,9 @@ class Product(models.Model):
     colors = models.CharField(max_length=255)
 
     def __str__(self):
-        return self.name
+        return (self.title)
+    def get_collection_name(self):
+        return self.collection.title
     
 
 class ProImage(models.Model):
@@ -208,11 +210,11 @@ class Favorite(models.Model):
     def prod_name(self):
         return self.product.title
     def prod_price(self):
-        return self.product.unit_price
+        return self.product.price
     def prod_description(self):
         return self.product.description
     def prod_quantity(self):
-        return self.product.inventory
+        return self.product.quantity
 
 class PanierItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
