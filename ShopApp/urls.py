@@ -8,18 +8,12 @@ router = DefaultRouter()
 router.register('products', views.ProductViewSet)
 router.register('customers', views.CustomerViewSet)
 router.register('Categories', views.CollectionViewSet)
-router.register('carts', views.CartViewSet)
 router.register(r'clothes',views.ClothesViewSet)
-router.register('orders',views.OrderViewSet)
 router.register(r'product_clothes_chaussures', ShopappProductClothesChaussuresViewSet)
 
 
-carts_router = NestedDefaultRouter(router, 'carts', lookup = 'cart')
-carts_router.register('items', views.CartItemViewSet, basename='cart-items')
-
-
 # URLConf
-urlpatterns = router.urls+carts_router.urls+[
+urlpatterns = router.urls+[
     path('products/<int:product_id>',views.ProductDetail.as_view()),
     path('products/collection/<str:category_name>/', product_collection),
     path('clothes/collection/<str:category_name>/',views.ClothesViewSet.as_view({'get': 'clothes_collection'}), name='clothes-collection'),  

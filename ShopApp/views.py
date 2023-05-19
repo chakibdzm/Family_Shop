@@ -30,12 +30,9 @@ def product_collection(request, category_name):
     serializer=ProductSerializer(products,many=True)
     return Response(serializer.data)
 
-
 class CommentCreateAPIView(generics.CreateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticated]
-
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
@@ -124,12 +121,7 @@ class CollectionViewSet(ModelViewSet):
         return super().destroy(request, *args, **kwargs)  
  
 
-class CartViewSet(ModelViewSet):
-    queryset = Cart.objects.prefetch_related('items__product').all()
-    serializer_class = CartSerializer
 
-    def get_serializer_context(self):
-        return {'request': self.request}
     
     
 class CustomerViewSet(ModelViewSet):
@@ -151,67 +143,30 @@ class CustomerViewSet(ModelViewSet):
             serializer.save()
             return Response(serializer.data)
 
-    
-class CartItemViewSet(ModelViewSet):
-    http_method_names = ['get', 'post', 'patch', 'delete']
-    #permission_classes=[IsAuthenticated]
-    def get_serializer_context(self):
-        return {'cart_id': self.kwargs['cart_pk']}
 
-    @action(detail=False,methods=['POST','PATCH'],permission_classes=[IsAuthenticated])
-    def get_serializer_class(self):
-        if self.request.method == "POST":
-            return AddCartItemSerializer
-        elif self.request.method == "PATCH":
-            return UpdateCartItemSerializer
-        return CartItemSerializer
-    
-    def get_queryset(self):
-        return CartItem.objects.filter(cart_id=self.kwargs['cart_pk'])
-    
+
 
 
 class FavoriteList(generics.ListCreateAPIView):
     serializer_class = FavoriteSerializer
-    queryset=Favorite.objects.all() 
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return Favorite.objects.filter(user=self.request.user)
 
 
 class FavoriteDetail(generics.RetrieveDestroyAPIView):
     serializer_class = FavoriteSerializer
-    #permission_classes = (permissions.IsAuthenticated,)
-    queryset = Favorite.objects.all()
-
-    
-
-
-class OrderViewSet(ModelViewSet):
-    #permission_classes = [IsAuthenticated]
-    queryset= Order.objects.prefetch_related('items__product').all()
-    def get_serializer_class(self):
-        if self.request.method == "POST":
-            return AddOrderSerializer
-        return OrderSerializer
-
-    def create(self, request, *args, **kwargs):
-        serializer = AddOrderSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        order = serializer.save(user=request.user)
-        serializer = OrderSerializer(order)
-        return Response(serializer.data)
-    
-    #def destroy(self, request, *args, **kwargs):
-    #    instance = self.get_object()
-    #    if instance.is_deletable():
-    #        self.perform_destroy(instance)
-    #        return Response(status=status.HTTP_204_NO_CONTENT)
-    #    else:
-    #        return Response({'detail': 'This order cannot be deleted.'}, status=status.HTTP_403_FORBIDDEN)
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        user = self.request.user
-        if user.is_staff:
-            return Order.objects.all()
- 
+        return Favorite.objects.filter(user=self.request.user)
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, product=self.kwargs['pk'])
+        return obj
+          
 
     
 class ShopappProductClothesChaussuresViewSet(ModelViewSet):

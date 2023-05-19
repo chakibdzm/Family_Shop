@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('last_name', models.CharField(max_length=255)),
                 ('phone_number', models.CharField(max_length=20)),
                 ('email', models.EmailField(max_length=200, unique=True)),
-                ('username', models.CharField(max_length=200, unique=True)),
+                ('username', models.CharField(max_length=150, unique=True)),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups')),
                 ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.permission', verbose_name='user permissions')),
             ],
