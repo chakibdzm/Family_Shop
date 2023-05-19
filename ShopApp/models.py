@@ -4,6 +4,7 @@ from django.db import models
 from uuid import uuid4
 from django.contrib import admin
 from django.utils import timezone
+
 #from datetime import timedelta
 class ProductAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
@@ -14,12 +15,6 @@ class ProductAdmin(admin.ModelAdmin):
     archive_selected_products.short_description = "Archive selected products"
     actions = [archive_selected_products]
     list_display = ['title', 'is_archived']
-
-    
-
-
-
-
 
 
 
@@ -40,51 +35,27 @@ class Collection(models.Model):
 class Sub_collection(models.Model):
     title=models.CharField(max_length=255)
     parent_collection=models.ForeignKey(Collection, on_delete=models.CASCADE, related_name='subcollections')
-    
-
-    
-    
-
-   
+      
     def __str__(self) ->str:
         return self.title
 #
 class Product(models.Model):
     title = models.CharField(max_length=255)
-    slug = models.SlugField()
-    tags = models.TextField(null=True,blank=True)
     description = models.TextField(null=True, blank=True)
-    unit_price = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        validators=[MinValueValidator(1)])
-    inventory = models.IntegerField(validators=[MinValueValidator(0)])
-    image = models.ImageField(upload_to = 'images',  blank = True, null=True, default='')
-    last_update = models.DateTimeField(auto_now=True)
-    collection = models.ForeignKey(Sub_collection, on_delete=models.CASCADE, related_name='products')
-    promotions = models.ManyToManyField(Promotion, blank=True)
+    price = models.IntegerField()
+    quantity = models.IntegerField(validators=[MinValueValidator(0)])
+    promotion_status = models.SmallIntegerField()
+    discount_percentage = models.IntegerField()
+    src_image = models.CharField(max_length=255)
+    alt_image = models.CharField(max_length=255)
+    collection = models.ForeignKey(Sub_collection, on_delete=models.CASCADE, related_name='products', null=True)
     is_archived = models.BooleanField(default=False)
+    taille = models.CharField(max_length=255)
+    colors = models.CharField(max_length=255)
 
-    def get_discounted_price(self):
-        """Returns the unit price after applying any promotions."""
-        now = timezone.now().date()
-        try:
-            promotion = self.promotions.get(date_start__lte=now, date_end__gte=now)
-        except Promotion.DoesNotExist:
-            return self.unit_price
-        else:
-            discount_factor = 1 - (promotion.discount / 100)
-            return self.unit_price * discount_factor
+    def __str__(self):
+        return self.name
     
-
-    def __str__(self) -> str:
-        return self.title
-    
-    def get_collection_name(self):
-        return self.collection.title
-     
-    class Meta:
-        ordering = ['title']
 
 class ProImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name = "images")
@@ -109,9 +80,10 @@ class Clothes(Product):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
 
     def get_collection_name(self):
-        return self.collection.title
+        return self.get_collection_name()
     
-
+    class Meta:
+        db_table = 'ShopApp_clothes'
 
 
 class Customer(models.Model):
@@ -290,5 +262,19 @@ class Orders(models.Model):
     
 
 
+
+
+
+class product_clothes_chaussures(models.Model):
+    title = models.CharField(max_length=255)
+    price = models.CharField(max_length=10)
+    colors = models.CharField(max_length=255)
+    src_image = models.CharField(max_length=255)
+    alt_image = models.CharField(max_length=255)
+    promotion_status = models.SmallIntegerField()
+    discount_percentage = models.IntegerField()
+    quantity = models.IntegerField()
+    pointure = models.CharField(max_length=255)
+    description = models.TextField() 
 
 

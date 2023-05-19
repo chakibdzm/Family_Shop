@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     'ShopApp',
     'core',
     'drf_yasg',
-   
 ]
 
 MIDDLEWARE = [
