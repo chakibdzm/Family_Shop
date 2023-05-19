@@ -54,7 +54,9 @@ class Product(models.Model):
     colors = models.CharField(max_length=255)
 
     def __str__(self):
-        return self.title
+        return (self.title)
+    def get_collection_name(self):
+        return self.collection.title
     
 
 class ProImage(models.Model):

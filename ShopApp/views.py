@@ -72,6 +72,9 @@ class ClothesViewSet(ModelViewSet):
 class ClothesViewSet(ModelViewSet):
     queryset = Clothes.objects.all()
     serializer_class = ClothesSerializer
+    filter_backends=(DjangoFilterBackend,SearchFilter,OrderingFilter)
+    filterset_fields=['gender']
+    search_fields=['title']
 
 
 class ProductDetail(generics.RetrieveAPIView):
@@ -108,6 +111,7 @@ class ProductViewSet(ModelViewSet):
     parser_classes = (MultiPartParser, FormParser)
     filter_backends=(DjangoFilterBackend,SearchFilter,OrderingFilter)
     filterset_fields=['collection']
+    search_fields=['title']
     permission_classes=[IsAdminOrReadOnly]
 
     #
