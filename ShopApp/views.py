@@ -24,7 +24,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from core.models import User
 
 from rest_framework.parsers import MultiPartParser, FormParser
-from push_notifications.models import GCMDevice
+
 #
 
 @api_view(['GET'])
@@ -219,35 +219,6 @@ class FavoriteViewSet(ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-<<<<<<< HEAD
-    #permission_classes = [IsAuthenticated]
-    queryset= Order.objects.prefetch_related('items__product').all()
-    def get_serializer_class(self):
-        if self.request.method == "POST":
-            return AddOrderSerializer
-        return OrderSerializer
-
-    def create(self, request, *args, **kwargs):
-        serializer = AddOrderSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        order = serializer.save(user=request.user)
-        serializer = OrderSerializer(order)
-        return Response(serializer.data)
-    
-    #def destroy(self, request, *args, **kwargs):
-    #    instance = self.get_object()
-    #    if instance.is_deletable():
-    #        self.perform_destroy(instance)
-    #        return Response(status=status.HTTP_204_NO_CONTENT)
-    #    else:
-    #        return Response({'detail': 'This order cannot be deleted.'}, status=status.HTTP_403_FORBIDDEN)
-
-    def get_queryset(self):
-        user = self.request.user
-        if user.is_staff:
-            return Order.objects.all()
-=======
->>>>>>> 19a84659995c57edd16ba38b67dc12e36fba4f21
         
 class panierViewSet(ModelViewSet):
     serializer_class=PanierItemSerializer
@@ -414,64 +385,10 @@ class UserOrderListView(generics.ListAPIView):
             order = order.filter(id=id)
 
         return order
-<<<<<<< HEAD
     
        
-=======
-
-
-class NotificationView(APIView):
-    permission_classes = [IsAdminUser]
-    def post(self, request):
-        serializer = NotificationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        message = serializer.validated_data['message']
-        users = User.objects.all()  
-        # Save the notification message for each user
-        notifications = []
-        for user in users:
-            notifications.append(Notification(user=user, message=message))
-        Notification.objects.bulk_create(notifications)
-        
-        # Send push notifications to the selected users using FCM
-        devices = GCMDevice.objects.filter(user__in=users)
-        for device in devices:
-            device.send_message(message)
-        
-        return Response({'message': 'Notifications sent successfully'})  
-
-
-class UserNotificationView(APIView):
-    def get(self, request):
-        #get user
-        token = self.request.headers.get('Authorization', '').split(' ')[1]
-
-        if not token:
-            raise AuthenticationFailed('Unauthenticated !')
-        try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated !')    
-
-        user = User.objects.get(id=payload['id'])
-
-        notifications = Notification.objects.filter(user=user).order_by('created_at')
-        serializer = NotificationSerializer(notifications, many=True)
-        return Response(serializer.data)
-
-
-
-
-
-
-
->>>>>>> cbf91b15f5b3b813dc3d21abed20e5e50303db0a
 
     
-<<<<<<< HEAD
-=======
 class ShopappProductClothesChaussuresViewSet(ModelViewSet):
     serializer_class = ProductClothesChaussuresSerializer
     queryset = product_clothes_chaussures.objects.all()      
->>>>>>> 19a84659995c57edd16ba38b67dc12e36fba4f21
