@@ -17,7 +17,9 @@ router.register(r'product_clothes_chaussures', ShopappProductClothesChaussuresVi
 # URLConf
 urlpatterns = router.urls+[
     path('products/<int:product_id>',views.ProductDetail.as_view()),
-    path('products/collection/<str:category_name>/', product_collection), 
+    path('products/collection/<str:category_name>/', product_collection),
+
+    #path('clothes/collection/<str:category_name>/',views.ClotheViewSet.as_view({'get': 'clothes_collection'}), name='clothes-collection'),  
     path('comments/create/', CommentCreateAPIView.as_view(), name='comment-create'), 
     path('panier_add/', AddToPanier.as_view()),
     path('panier_remove/<int:id>/', panierViewSet.as_view({'delete': 'destroy'})),
