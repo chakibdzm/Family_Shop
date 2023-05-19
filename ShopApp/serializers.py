@@ -44,14 +44,11 @@ class ClothesSerializer(serializers.ModelSerializer):
 ##
 class ProductSerializer(serializers.ModelSerializer):
     collection_name = serializers.SerializerMethodField(method_name="get_collection_name")
-    collection_name = serializers.SerializerMethodField(method_name="get_collection_name")
     comments = CommentSerializer(many=True, read_only=True)
     
 
     class Meta:
         model = Product
-        fields =  ['id', 'title', 'description', 'quantity', 'price','promotion_status', 'discount_percentage', 'collection_name','src_image','alt_image','taille', 'colors','comments']
-
         fields =  ['id', 'title', 'description', 'quantity', 'price','promotion_status', 'discount_percentage', 'collection_name','src_image','alt_image','taille', 'colors','comments']
 
     def get_collection_name(self, obj):

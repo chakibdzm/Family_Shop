@@ -315,10 +315,8 @@ class AddToPanier(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         product = Product.objects.get(id=serializer.validated_data['product_id'])
         quantity = serializer.validated_data['quantity']
-        price = product.price
         price = product.price
         token = self.request.headers.get('Authorization', '').split(' ')[1]
 
