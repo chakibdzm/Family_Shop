@@ -43,16 +43,14 @@ class ClothesSerializer(serializers.ModelSerializer):
 
 ##
 class ProductSerializer(serializers.ModelSerializer):
+    collection_name = serializers.SerializerMethodField(method_name="get_collection_name")
     comments = CommentSerializer(many=True, read_only=True)
-    images = ProductImageSerializer(many=True, read_only=True)
-    uploaded_images = serializers.ListField(
-        child = serializers.ImageField(max_length = 1000000, allow_empty_file = False, use_url = False),
-        write_only=True)
     
 
     class Meta:
         model = Product
-        fields = '__all__'
+        fields =  ['id', 'title', 'description', 'quantity', 'price','promotion_status', 'discount_percentage', 'collection_name','src_image','alt_image','taille', 'colors','comments']
+
     def get_collection_name(self, obj):
         return obj.get_collection_name()
     
@@ -62,6 +60,12 @@ class ProductSerializer(serializers.ModelSerializer):
         for image in uploaded_images:
             newproduct_image = ProImage.objects.create(product=product, image=image)
         return product
+
+   
+    def get_discounted_price(self, obj):
+        return obj.get_discounted_price()
+
+     
 
     
 class ClothesSerializer(serializers.ModelSerializer):
