@@ -66,6 +66,7 @@ class Comment(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    
 
     class Meta:
         ordering = ['-created_at']
@@ -199,11 +200,19 @@ class club_member(models.Model):
 
 class Favorite(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,related_name='fav_product')
     
     class Meta:
         unique_together = ('user', 'product')
 
+    def prod_name(self):
+        return self.product.title
+    def prod_price(self):
+        return self.product.unit_price
+    def prod_description(self):
+        return self.product.description
+    def prod_quantity(self):
+        return self.product.inventory
 
 class PanierItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -212,13 +221,23 @@ class PanierItem(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2)
     date_added = models.DateTimeField(default=timezone.now)
 
+
     def subtotal(self):
         return self.quantity * self.price
+    
+    def product_name(self):
+        return self.product.title
+    
+    def product_description(self):
+        return self.product.description
+    
+    def product_price(self):
+        return self.price
 
     def __str__(self):
         return f'{self.quantity} x {self.product.title}'
     
-
+    
 
 
 
@@ -232,6 +251,13 @@ class Orders(models.Model):
 
     def __str__(self) -> str:
         return str(self.user) 
+    
+    def get_items_by_product_name(self,product_name):
+        return self.items.filter(product__product__title=product_name)
+    
+
+    
+    
     
     
 

@@ -9,7 +9,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('id', 'product', 'user', 'text', 'created_at')
+        fields = ('id', 'product','user', 'user_id', 'text', 'created_at')
 
 class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -79,9 +79,13 @@ class CustomerSerializer(serializers.ModelSerializer):
         fields = ['id','user_id','phone', 'birth_date', 'membership', ]  
 
 class FavoriteSerializer(serializers.ModelSerializer):
+    prod_price=serializers.ReadOnlyField()
+    prod_name=serializers.ReadOnlyField()
+    prod_description=serializers.ReadOnlyField()
+    prod_quantity=serializers.ReadOnlyField()
     class Meta:
         model = Favorite
-        fields = ('id', 'product','user')
+        fields = ('id', 'product','prod_name','prod_price','prod_description','prod_quantity','user')
 
 
 
@@ -91,13 +95,19 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 
 class PanierItemSerializer(serializers.ModelSerializer):
-    product_name = serializers.ReadOnlyField(source='product.name')
-    product_price = serializers.ReadOnlyField(source='product.price')
     subtotal = serializers.ReadOnlyField()
-
+    product_name=serializers.ReadOnlyField()
+    product_description=serializers.ReadOnlyField()
+    product_price=serializers.ReadOnlyField()
     class Meta:
         model = PanierItem
-        fields = ['id', 'product', 'product_name', 'product_price', 'quantity', 'price', 'subtotal']
+        fields = ['product_id', 'product_name','product_description','quantity', 'product_price', 'subtotal']
+
+
+    def update(self, instance, validated_data):
+        instance.quantity = validated_data.get('quantity', instance.quantity)
+        instance.save()
+        return instance
 
 class AddToPanierSerializer(serializers.Serializer):
     product_id = serializers.IntegerField()
@@ -108,6 +118,8 @@ class AddToPanierSerializer(serializers.Serializer):
 
 
 class OrdersSerializer(serializers.ModelSerializer):
+    items = PanierItemSerializer(many=True, read_only=True)
+
     class Meta:
         model = Orders
         fields = ['id', 'user', 'items', 'created_at', 'total']
