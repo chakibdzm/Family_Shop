@@ -39,8 +39,8 @@ def product_collection(request, category_name):
 class CommentCreateAPIView(generics.CreateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    
 
+    
     def perform_create(self, serializer):
         token = self.request.headers.get('Authorization', '').split(' ')[1]
         if not token:
@@ -72,6 +72,9 @@ class ClothesViewSet(ModelViewSet):
 class ClothesViewSet(ModelViewSet):
     queryset = Clothes.objects.all()
     serializer_class = ClothesSerializer
+    filter_backends=(DjangoFilterBackend,SearchFilter,OrderingFilter)
+    filterset_fields=['gender']
+    search_fields=['title']
 
 
 class ProductDetail(generics.RetrieveAPIView):
@@ -108,6 +111,7 @@ class ProductViewSet(ModelViewSet):
     parser_classes = (MultiPartParser, FormParser)
     filter_backends=(DjangoFilterBackend,SearchFilter,OrderingFilter)
     filterset_fields=['collection']
+    search_fields=['title']
     permission_classes=[IsAdminOrReadOnly]
 
     #
@@ -139,12 +143,7 @@ class CollectionViewSet(ModelViewSet):
         return super().destroy(request, *args, **kwargs)  
  
 
-class CartViewSet(ModelViewSet):
-    queryset = Cart.objects.prefetch_related('items__product').all()
-    serializer_class = CartSerializer
 
-    def get_serializer_context(self):
-        return {'request': self.request}
     
     
 class CustomerViewSet(ModelViewSet):
@@ -166,23 +165,9 @@ class CustomerViewSet(ModelViewSet):
             serializer.save()
             return Response(serializer.data)
 
-    
-class CartItemViewSet(ModelViewSet):
-    http_method_names = ['get', 'post', 'patch', 'delete']
-    
-    def get_serializer_context(self):
-        return {'cart_id': self.kwargs['cart_pk']}
 
-    @action(detail=False,methods=['POST','PATCH'],permission_classes=[IsAuthenticated])
-    def get_serializer_class(self):
-        if self.request.method == "POST":
-            return AddCartItemSerializer
-        elif self.request.method == "PATCH":
-            return UpdateCartItemSerializer
-        return CartItemSerializer
+ 
     
-    def get_queryset(self):
-        return CartItem.objects.filter(cart_id=self.kwargs['cart_pk'])
     
 class FavoriteViewSet(ModelViewSet):
     serializer_class = FavoriteSerializer
@@ -232,12 +217,9 @@ class FavoriteViewSet(ModelViewSet):
         favorites.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
-    
-    
 
-class OrderViewSet(ModelViewSet):
 
+<<<<<<< HEAD
     #permission_classes = [IsAuthenticated]
     queryset= Order.objects.prefetch_related('items__product').all()
     def get_serializer_class(self):
@@ -264,6 +246,8 @@ class OrderViewSet(ModelViewSet):
         user = self.request.user
         if user.is_staff:
             return Order.objects.all()
+=======
+>>>>>>> 19a84659995c57edd16ba38b67dc12e36fba4f21
         
 class panierViewSet(ModelViewSet):
     serializer_class=PanierItemSerializer
@@ -360,7 +344,7 @@ class AddToPanier(generics.CreateAPIView):
 
         product = Product.objects.get(id=serializer.validated_data['product_id'])
         quantity = serializer.validated_data['quantity']
-        price = product.unit_price
+        price = product.price
         token = self.request.headers.get('Authorization', '').split(' ')[1]
 
         if not token:
@@ -431,14 +415,12 @@ class UserOrderListView(generics.ListAPIView):
 
         return order
     
-
-
-
-
-
-
-
-
-
+       
 
     
+<<<<<<< HEAD
+=======
+class ShopappProductClothesChaussuresViewSet(ModelViewSet):
+    serializer_class = ProductClothesChaussuresSerializer
+    queryset = product_clothes_chaussures.objects.all()      
+>>>>>>> 19a84659995c57edd16ba38b67dc12e36fba4f21
