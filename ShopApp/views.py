@@ -22,7 +22,7 @@ from rest_framework import status
 import jwt
 from rest_framework.exceptions import AuthenticationFailed
 from core.models import User
-
+from django.db.models import Q
 from rest_framework.parsers import MultiPartParser, FormParser
 
 #
@@ -30,9 +30,51 @@ from rest_framework.parsers import MultiPartParser, FormParser
 @api_view(['GET'])
 def product_collection(request, category_name):
     category = get_object_or_404(Sub_collection, title=category_name)
+    query = request.GET.get('search')  # Get the search query from the request parameters
+    min_price = request.GET.get('min_price')  # Get the minimum price filter from the request parameters
+    max_price = request.GET.get('max_price')
+    # Filter products by collection and search query
     products = Product.objects.filter(collection=category)
-    serializer=ProductSerializer(products,many=True)
+    
+    if query:
+        # Use Q objects to perform a case-insensitive search on the title field
+        products = products.filter(Q(title__icontains=query))
+
+    if min_price and max_price:
+        # Filter products by price range
+        products = products.filter(price__gte=min_price, price__lte=max_price)
+    
+    serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
+
+
+
+@api_view(['GET'])
+def clothes_collection(request, category_name):
+    category = get_object_or_404(Sub_collection, title=category_name)
+    query = request.GET.get('search')  # Get the search query from the request parameters
+    gender = request.GET.get('gender')
+    min_price = request.GET.get('min_price')  # Get the minimum price filter from the request parameters
+    max_price = request.GET.get('max_price')
+
+    # Filter products by collection and search query
+    products = Clothes.objects.filter(collection=category)
+    if gender:
+        # Filter products by gender
+        products = products.filter(gender=gender)
+    if query:
+        # Use Q objects to perform a case-insensitive search on the title field
+        products = products.filter(Q(title__icontains=query))
+
+
+    if min_price and max_price:
+        # Filter products by price range
+        products = products.filter(price__gte=min_price, price__lte=max_price)
+    
+    serializer = ClothesSerializer(products, many=True)
+    return Response(serializer.data)
+
+
 
 
 
