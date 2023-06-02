@@ -82,7 +82,7 @@ class Clothes(Product):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
 
     def get_collection_name(self):
-        return self.get_collection_name()
+        return self.collection.title
     
     class Meta:
         db_table = 'ShopApp_clothes'
@@ -261,11 +261,6 @@ class Orders(models.Model):
     
     
     
-    
-
-
-
-
 
 class product_clothes_chaussures(models.Model):
     title = models.CharField(max_length=255)

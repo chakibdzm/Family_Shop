@@ -22,17 +22,60 @@ from rest_framework import status
 import jwt
 from rest_framework.exceptions import AuthenticationFailed
 from core.models import User
-
+from django.db.models import Q
 from rest_framework.parsers import MultiPartParser, FormParser
-from push_notifications.models import GCMDevice
+#from push_notifications.models import GCMDevice
+
 #
 
 @api_view(['GET'])
 def product_collection(request, category_name):
     category = get_object_or_404(Sub_collection, title=category_name)
+    query = request.GET.get('search')  # Get the search query from the request parameters
+    min_price = request.GET.get('min_price')  # Get the minimum price filter from the request parameters
+    max_price = request.GET.get('max_price')
+    # Filter products by collection and search query
     products = Product.objects.filter(collection=category)
-    serializer=ProductSerializer(products,many=True)
+    
+    if query:
+        # Use Q objects to perform a case-insensitive search on the title field
+        products = products.filter(Q(title__icontains=query))
+
+    if min_price and max_price:
+        # Filter products by price range
+        products = products.filter(price__gte=min_price, price__lte=max_price)
+    
+    serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
+
+
+
+@api_view(['GET'])
+def clothes_collection(request, category_name):
+    category = get_object_or_404(Sub_collection, title=category_name)
+    query = request.GET.get('search')  # Get the search query from the request parameters
+    gender = request.GET.get('gender')
+    min_price = request.GET.get('min_price')  # Get the minimum price filter from the request parameters
+    max_price = request.GET.get('max_price')
+
+    # Filter products by collection and search query
+    products = Clothes.objects.filter(collection=category)
+    if gender:
+        # Filter products by gender
+        products = products.filter(gender=gender)
+    if query:
+        # Use Q objects to perform a case-insensitive search on the title field
+        products = products.filter(Q(title__icontains=query))
+
+
+    if min_price and max_price:
+        # Filter products by price range
+        products = products.filter(price__gte=min_price, price__lte=max_price)
+    
+    serializer = ClothesSerializer(products, many=True)
+    return Response(serializer.data)
+
+
 
 
 
@@ -45,7 +88,7 @@ class CommentCreateAPIView(generics.CreateAPIView):
         token = self.request.headers.get('Authorization', '').split(' ')[1]
         if not token:
             raise AuthenticationFailed('Unauthenticated! : no token found')
-
+        
         try:
             payload = jwt.decode(token, 'secret', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
@@ -75,6 +118,7 @@ class ClothesViewSet(ModelViewSet):
     filter_backends=(DjangoFilterBackend,SearchFilter,OrderingFilter)
     filterset_fields=['gender']
     search_fields=['title']
+
 
 
 class ProductDetail(generics.RetrieveAPIView):
@@ -166,7 +210,7 @@ class CustomerViewSet(ModelViewSet):
             return Response(serializer.data)
 
 
- 
+  
     
     
 class FavoriteViewSet(ModelViewSet):
@@ -217,6 +261,8 @@ class FavoriteViewSet(ModelViewSet):
         favorites.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 
 
         
@@ -312,7 +358,6 @@ class AddToPanier(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         product = Product.objects.get(id=serializer.validated_data['product_id'])
         quantity = serializer.validated_data['quantity']
         price = product.price
@@ -386,58 +431,44 @@ class UserOrderListView(generics.ListAPIView):
 
         return order
     
-       
-
     
-class ShopappProductClothesChaussuresViewSet(ModelViewSet):
-    serializer_class = ProductClothesChaussuresSerializer
-    queryset = product_clothes_chaussures.objects.all()      
-
-
-
-class NotificationView(APIView):
-    permission_classes = [IsAdminUser]
-    def post(self, request):
-        serializer = NotificationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        message = serializer.validated_data['message']
-        users = User.objects.all()  
+    
+#class NotificationView(APIView):
+ #   permission_classes = [IsAdminUser]
+  #  def post(self, request):
+   #     serializer = NotificationSerializer(data=request.data)
+    #    serializer.is_valid(raise_exception=True)
+     #  
+      #  message = serializer.validated_data['message']
+       # users = User.objects.all()  
         # Save the notification message for each user
-        notifications = []
-        for user in users:
-            notifications.append(Notification(user=user, message=message))
-        Notification.objects.bulk_create(notifications)
+        #notifications = []
+        #for user in users:
+        #    notifications.append(Notification(user=user, message=message))
+        #Notification.objects.bulk_create(notifications)
         
         # Send push notifications to the selected users using FCM
-        devices = GCMDevice.objects.filter(user__in=users)
-        for device in devices:
-            device.send_message(message)
+        #devices = GCMDevice.objects.filter(user__in=users)
+        #for device in devices:
+         #   device.send_message(message)
         
-        return Response({'message': 'Notifications sent successfully'})  
+        #return Response({'message': 'Notifications sent successfully'})  
 
 
-class UserNotificationView(APIView):
-    def get(self, request):
-        #get user
-        token = self.request.headers.get('Authorization', '').split(' ')[1]
-
-        if not token:
-            raise AuthenticationFailed('Unauthenticated !')
-        try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated !')    
-
-        user = User.objects.get(id=payload['id'])
-
-        notifications = Notification.objects.filter(user=user).order_by('created_at')
-        serializer = NotificationSerializer(notifications, many=True)
-        return Response(serializer.data)
-
-
-
-
-
-
-
+#class UserNotificationView(APIView):
+ #   def get(self, request):
+  #      #get user
+   #     token = self.request.headers.get('Authorization', '').split(' ')[1]
+#
+ #       if not token:
+  #          raise AuthenticationFailed('Unauthenticated !')
+   #     try:
+    #        payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+     #   except jwt.ExpiredSignatureError:
+      #      raise AuthenticationFailed('Unauthenticated !')    
+#
+ #       user = User.objects.get(id=payload['id'])
+#
+ #       notifications = Notification.objects.filter(user=user).order_by('created_at')
+  #      serializer = NotificationSerializer(notifications, many=True)
+   #     return Response(serializer.data)

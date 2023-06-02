@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from decimal import Decimal
 from .models import *
-from django.db import transaction,Sum
-from django.utils import datetime,timedelta
+from django.utils.timezone import timedelta,datetime
+
 
 class CommentSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField()
@@ -52,8 +52,6 @@ class ProductSerializer(serializers.ModelSerializer):
     collection_name = serializers.SerializerMethodField(method_name="get_collection_name")
     comments = CommentSerializer(many=True, read_only=True)
     
-    
-    
 
     class Meta:
         model = Product
@@ -75,6 +73,19 @@ class ProductSerializer(serializers.ModelSerializer):
 
      
 
+    
+class ClothesSerializer(serializers.ModelSerializer):
+    collection_name = serializers.SerializerMethodField(method_name="get_collection_name")
+    class Meta:
+        model = Clothes
+        fields =  ['id', 'title', 'description','gender', 'quantity', 'price','promotion_status', 'discount_percentage', 'collection_name','src_image','alt_image','taille', 'colors','comments']
+
+
+    def get_collection_name(self, obj):
+        return obj.get_collection_name()
+
+     
+
 class CustomerSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(read_only=True)
 
@@ -86,7 +97,7 @@ class CustomerSerializer(serializers.ModelSerializer):
         total_amount = OrderItem.objects.filter(
             order__customer=instance,
             order__placed_at__gte= datetime.now() - timedelta(days=30)
-        ).aggregate(Sum('total_price'))['total_price__sum'] or 0
+        ).aggregate(sum('total_price'))['total_price__sum'] or 0
 
         if total_amount >= 50000:
             representation['membership'] = Customer.MEMBERSHIP_GOLD
@@ -107,33 +118,45 @@ class CustomerSerializer(serializers.ModelSerializer):
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
+    prod_price=serializers.ReadOnlyField()
+    prod_name=serializers.ReadOnlyField()
+    prod_description=serializers.ReadOnlyField()
+    prod_quantity=serializers.ReadOnlyField()
     class Meta:
         model = Favorite
-        fields = ('id', 'product', 'created_at')
+        fields = ('id', 'product','prod_name','prod_price','prod_description','prod_quantity','user')
 
-    
-class ProductClothesMenSerializer(serializers.ModelSerializer):
+
+class PanierItemSerializer(serializers.ModelSerializer):
+    subtotal = serializers.ReadOnlyField()
+    product_name=serializers.ReadOnlyField()
+    product_description=serializers.ReadOnlyField()
+    product_price=serializers.ReadOnlyField()
     class Meta:
-        model = product_clothes_men
-        fields = ('id', 'title', 'price', 'colors', 'src_image', 'alt_image', 'promotion_status', 'discount_percentage', 'quantity', 'taille', 'description')
+        model = PanierItem
+        fields = ['product_id', 'product_name','product_description','quantity', 'product_price', 'subtotal']
 
 
-class ShopappProductClothesWomenSerializer(serializers.ModelSerializer):
+    def update(self, instance, validated_data):
+        instance.quantity = validated_data.get('quantity', instance.quantity)
+        instance.save()
+        return instance
+
+class AddToPanierSerializer(serializers.Serializer):
+    product_id = serializers.IntegerField()
+    quantity = serializers.IntegerField(min_value=1)
+
+
+
+class OrdersSerializer(serializers.ModelSerializer):
+    items = PanierItemSerializer(many=True, read_only=True)
+
     class Meta:
-        model = product_clothes_women
-        fields = ('id', 'title', 'price', 'colors', 'src_image', 'alt_image', 'promotion_status', 'discount_percentage', 'quantity', 'taille', 'description')
+        model = Orders
+        fields = ['id', 'user', 'items', 'created_at', 'total']
+        read_only_fields = ['created_at', 'total']
 
-class ShopappProductClothesKidsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = product_clothes_kids
-        fields = ('id', 'title', 'price', 'colors', 'src_image', 'alt_image', 'promotion_status', 'discount_percentage', 'quantity', 'taille', 'description')
-   
-class ProductClothesChaussuresSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = product_clothes_chaussures
-        fields = ('id', 'title', 'price', 'colors', 'src_image', 'alt_image', 'promotion_status', 'discount_percentage', 'quantity', 'pointure', 'description')
-
-
+ 
 
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
