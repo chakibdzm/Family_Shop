@@ -24,7 +24,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from core.models import User
 
 from rest_framework.parsers import MultiPartParser, FormParser
-
+from push_notifications.models import GCMDevice
 #
 
 @api_view(['GET'])
@@ -392,3 +392,52 @@ class UserOrderListView(generics.ListAPIView):
 class ShopappProductClothesChaussuresViewSet(ModelViewSet):
     serializer_class = ProductClothesChaussuresSerializer
     queryset = product_clothes_chaussures.objects.all()      
+
+
+
+class NotificationView(APIView):
+    permission_classes = [IsAdminUser]
+    def post(self, request):
+        serializer = NotificationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        message = serializer.validated_data['message']
+        users = User.objects.all()  
+        # Save the notification message for each user
+        notifications = []
+        for user in users:
+            notifications.append(Notification(user=user, message=message))
+        Notification.objects.bulk_create(notifications)
+        
+        # Send push notifications to the selected users using FCM
+        devices = GCMDevice.objects.filter(user__in=users)
+        for device in devices:
+            device.send_message(message)
+        
+        return Response({'message': 'Notifications sent successfully'})  
+
+
+class UserNotificationView(APIView):
+    def get(self, request):
+        #get user
+        token = self.request.headers.get('Authorization', '').split(' ')[1]
+
+        if not token:
+            raise AuthenticationFailed('Unauthenticated !')
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Unauthenticated !')    
+
+        user = User.objects.get(id=payload['id'])
+
+        notifications = Notification.objects.filter(user=user).order_by('created_at')
+        serializer = NotificationSerializer(notifications, many=True)
+        return Response(serializer.data)
+
+
+
+
+
+
+

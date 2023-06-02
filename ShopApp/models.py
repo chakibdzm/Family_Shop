@@ -280,3 +280,10 @@ class product_clothes_chaussures(models.Model):
     description = models.TextField() 
 
 
+class Notification(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.message
