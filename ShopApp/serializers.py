@@ -132,9 +132,10 @@ class PanierItemSerializer(serializers.ModelSerializer):
     product_name=serializers.ReadOnlyField()
     product_description=serializers.ReadOnlyField()
     product_price=serializers.ReadOnlyField()
+    product_quantity=serializers.ReadOnlyField()
     class Meta:
         model = PanierItem
-        fields = ['product_id', 'product_name','product_description','quantity', 'product_price', 'subtotal']
+        fields = ['product_id', 'product_name','product_quantity','product_description','quantity', 'product_price', 'subtotal']
 
 
     def update(self, instance, validated_data):

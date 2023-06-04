@@ -24,7 +24,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from core.models import User
 from django.db.models import Q
 from rest_framework.parsers import MultiPartParser, FormParser
-from push_notifications.models import GCMDevice
+#from push_notifications.models import GCMDevice
 
 #
 
@@ -433,26 +433,26 @@ class UserOrderListView(generics.ListAPIView):
     
     
     
-class NotificationView(APIView):
-    permission_classes = [IsAdminUser]
-    def post(self, request):
-        serializer = NotificationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-       
-        message = serializer.validated_data['message']
-        users = User.objects.all()  
+#class NotificationView(APIView):
+ #   permission_classes = [IsAdminUser]
+  #  def post(self, request):
+   #     serializer = NotificationSerializer(data=request.data)
+    #    serializer.is_valid(raise_exception=True)
+     #  
+      #  message = serializer.validated_data['message']
+       # users = User.objects.all()  
         # Save the notification message for each user
-        notifications = []
-        for user in users:
-            notifications.append(Notification(user=user, message=message))
-        Notification.objects.bulk_create(notifications)
+        #notifications = []
+        #for user in users:
+         #   notifications.append(Notification(user=user, message=message))
+        #Notification.objects.bulk_create(notifications)
         
         # Send push notifications to the selected users using FCM
-        devices = GCMDevice.objects.filter(user__in=users)
-        for device in devices:
-            device.send_message(message)
+        #devices = GCMDevice.objects.filter(user__in=users)
+        #for device in devices:
+         #   device.send_message(message)
         
-        return Response({'message': 'Notifications sent successfully'})  
+        #return Response({'message': 'Notifications sent successfully'})  
 
 
 class UserNotificationView(APIView):

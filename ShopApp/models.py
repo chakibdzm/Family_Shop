@@ -229,6 +229,8 @@ class PanierItem(models.Model):
     
     def product_name(self):
         return self.product.title
+    def product_quantity(self):
+        return self.product.quantity
     
     def product_description(self):
         return self.product.description
