@@ -26,7 +26,7 @@ urlpatterns = router.urls+[
     path('order/', UserOrderListView.as_view(), name='user-order-list'),
     path('favorites_remove/<int:product_id>/', FavoriteViewSet.as_view({'delete': 'destroy'}), name='favorite-delete'),
     path('clothes/collection/<str:category_name>/',views.ClothesViewSet.as_view({'get': 'clothes_collection'}), name='clothes-collection'),  
-   # path('notifications/', UserNotificationView.as_view(),basename='user-notifications'),
+    path('notifications/', UserNotificationView.as_view()),
     
     ]
 
