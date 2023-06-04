@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from decimal import Decimal
 from .models import *
-from django.db import transaction
+from django.utils.timezone import timedelta,datetime
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -9,7 +9,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('id', 'product','user', 'user_id', 'text', 'created_at')
+        fields = ('id', 'product', 'user', 'text', 'created_at')
 
 class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,19 +28,25 @@ class SubCollectionSerializer(serializers.ModelSerializer):
         model=Sub_collection
         fields=['id','parent_collection','title']
     products_count = serializers.IntegerField(read_only=True)
-'''
+
 class ClothesSerializer(serializers.ModelSerializer):
     sub_collection_name = serializers.SerializerMethodField(method_name="get_collection_name")
     class Meta:
 
         model=Clothes
-        fields='__all__'
+        fields=['id', 'title','gender', 'description', 'slug', 'inventory', 'unit_price','discounted_price', 'price_with_tax', 'sub_collection_name','tags']
 
     
+    price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax')
+    discounted_price = serializers.SerializerMethodField(method_name='get_discounted_price')
     def get_collection_name(self, obj):
-        return obj.get_collection_name()'''
+        return obj.get_collection_name()
+    
+    def get_discounted_price(self, obj):
+        return obj.get_discounted_price()
 
-
+    def calculate_tax(self, product: Product):
+        return product.unit_price * Decimal(1.1)
 ##
 class ProductSerializer(serializers.ModelSerializer):
     collection_name = serializers.SerializerMethodField(method_name="get_collection_name")
@@ -82,9 +88,34 @@ class ClothesSerializer(serializers.ModelSerializer):
 
 class CustomerSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(read_only=True)
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if self.context['request'].method == 'GET':
+            return representation
+
+        total_amount = OrderItem.objects.filter(
+            order__customer=instance,
+            order__placed_at__gte= datetime.now() - timedelta(days=30)
+        ).aggregate(sum('total_price'))['total_price__sum'] or 0
+
+        if total_amount >= 50000:
+            representation['membership'] = Customer.MEMBERSHIP_GOLD
+        elif total_amount >= 30000:
+            representation['membership'] = Customer.MEMBERSHIP_SILVER
+        elif total_amount >= 10000:
+            representation['membership'] = Customer.MEMBERSHIP_BRONZE
+
+        instance.membership = representation['membership']
+        instance.save()
+
+        return representation
+
     class Meta:
         model = Customer
-        fields = ['id','user_id','phone', 'birth_date', 'membership', ]  
+        fields = ['id','user_id','phone', 'birth_date', 'membership', ] 
+
+
 
 class FavoriteSerializer(serializers.ModelSerializer):
     prod_price=serializers.ReadOnlyField()
@@ -94,12 +125,6 @@ class FavoriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favorite
         fields = ('id', 'product','prod_name','prod_price','prod_description','prod_quantity','user')
-
-
-
-
-
-
 
 
 class PanierItemSerializer(serializers.ModelSerializer):
@@ -123,20 +148,17 @@ class AddToPanierSerializer(serializers.Serializer):
 
 
 
-
-
 class OrdersSerializer(serializers.ModelSerializer):
     items = PanierItemSerializer(many=True, read_only=True)
 
     class Meta:
         model = Orders
         fields = ['id', 'user', 'items', 'created_at', 'total']
-        read_only_fields = ['created_at', 'total']    
+        read_only_fields = ['created_at', 'total']
 
-    
-   
-class ProductClothesChaussuresSerializer(serializers.ModelSerializer):
+ 
+
+class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = product_clothes_chaussures
-        fields = ('id', 'title', 'price', 'colors', 'src_image', 'alt_image', 'promotion_status', 'discount_percentage', 'quantity', 'pointure', 'description')
-        
+        model = Notification
+        fields = '__all__'

@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'ShopApp',
     'core',
     'drf_yasg',
+    'push_notifications',
 ]
 
 MIDDLEWARE = [
@@ -111,6 +112,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+PUSH_NOTIFICATIONS_SETTINGS = {
+    "FCM_API_KEY":"753017826363"
+    # firebase notification push api handler
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
@@ -181,3 +186,9 @@ JWT_AUTH = {
 }
 
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'ys.maachou@gmail.com'
+EMAIL_HOST_PASSWORD = 'plrlcykblgnxtsud'
