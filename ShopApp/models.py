@@ -249,6 +249,7 @@ class Orders(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     items = models.ManyToManyField('PanierItem')
     created_at = models.DateTimeField(default=timezone.now)
+    points_incremented = models.BooleanField(default=False)
 
     def total(self):
         return sum(item.subtotal() for item in self.items.all())    

@@ -391,7 +391,7 @@ class AddToPanier(generics.CreateAPIView):
 class OrderView(APIView):
    
 
-    def post(self, request):
+    def post(self, request,id_prod):
         token = self.request.headers.get('Authorization', '').split(' ')[1]
 
         if not token:
@@ -410,7 +410,7 @@ class OrderView(APIView):
 
 class UserOrderListView(generics.ListAPIView):
     serializer_class = OrdersSerializer
-
+    lookup_field = 'id'
     def get_queryset(self):
         token = self.request.headers.get('Authorization', '').split(' ')[1]
 
@@ -431,6 +431,8 @@ class UserOrderListView(generics.ListAPIView):
 
         return order
     
+
+
     
     
 #class NotificationView(APIView):
