@@ -391,7 +391,7 @@ class AddToPanier(generics.CreateAPIView):
 class OrderView(APIView):
    
 
-    def post(self, request,id_prod):
+    def post(self, request):
         token = self.request.headers.get('Authorization', '').split(' ')[1]
 
         if not token:
