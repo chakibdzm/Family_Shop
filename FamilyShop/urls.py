@@ -10,6 +10,7 @@ from djoser.views import UserViewSet
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 from core.views import LoginView, LogoutView, RegisterView, UserView
+from core.views import EmailVerificationView, VerificationErrorView
 
 #admin.site.site_header = 'Family Shop'
 #admin.site.index_title = 'Admin'
@@ -64,7 +65,9 @@ urlpatterns += [
     path('reset_password', auth_views.PasswordResetView.as_view(), name = "reset_password"),
     path('reset_password_sent', auth_views.PasswordResetDoneView.as_view(), name = "password_reset_done"),
     path('reset/<uibd64>/<token>', auth_views.PasswordResetConfirmView.as_view(), name = "password_reset_confirm"),
-    path('reset_password_complete', auth_views.PasswordResetCompleteView.as_view(), name = "password_reset_complete")
+    path('reset_password_complete', auth_views.PasswordResetCompleteView.as_view(), name = "password_reset_complete"),
+    path('verify-email/', EmailVerificationView.as_view(), name='verify-email'),	
+    path('verification-error/', VerificationErrorView.as_view(), name='verification-error'),
 ]
 
 
