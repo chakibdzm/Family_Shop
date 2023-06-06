@@ -403,7 +403,8 @@ class OrderView(APIView):
 
         user = User.objects.get(id=payload['id'])
         cart_items = PanierItem.objects.filter(user=user)
-        order = Orders.objects.create(user=user)
+        address = request.data.get('address')
+        order = Orders.objects.create(user=user,address=address)
         order.items.set(cart_items)
         order_serializer = OrdersSerializer(order)
         return Response(order_serializer.data, status=status.HTTP_201_CREATED)  
