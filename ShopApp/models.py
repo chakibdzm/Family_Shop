@@ -51,7 +51,7 @@ class Product(models.Model):
     collection = models.ForeignKey(Sub_collection, on_delete=models.CASCADE, related_name='products', null=True)
     is_archived = models.BooleanField(default=False)
     taille = models.CharField(max_length=255, blank=True)
-    colors = models.CharField(max_length=255)
+    colors = models.CharField(max_length=255, blank=True)
     TYPE_CHOICES = (
         ('M', 'Male'),
         ('F', 'Female')
