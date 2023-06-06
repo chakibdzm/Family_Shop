@@ -122,9 +122,10 @@ class FavoriteSerializer(serializers.ModelSerializer):
     prod_name=serializers.ReadOnlyField()
     prod_description=serializers.ReadOnlyField()
     prod_quantity=serializers.ReadOnlyField()
+    alt_image=serializers.ReadOnlyField()
     class Meta:
         model = Favorite
-        fields = ('id', 'product','prod_name','prod_price','prod_description','prod_quantity','user')
+        fields = ('id', 'alt_image','product','prod_name','prod_price','prod_description','prod_quantity','user')
 
 
 class PanierItemSerializer(serializers.ModelSerializer):
@@ -133,9 +134,10 @@ class PanierItemSerializer(serializers.ModelSerializer):
     product_description=serializers.ReadOnlyField()
     product_price=serializers.ReadOnlyField()
     product_quantity=serializers.ReadOnlyField()
+    alt_image=serializers.ReadOnlyField()
     class Meta:
         model = PanierItem
-        fields = ['product_id', 'product_name','product_quantity','product_description','quantity', 'product_price', 'subtotal']
+        fields = ['product_id', 'alt_image','product_name','product_quantity','product_description','quantity', 'product_price', 'subtotal']
 
 
     def update(self, instance, validated_data):
