@@ -52,6 +52,12 @@ class Product(models.Model):
     is_archived = models.BooleanField(default=False)
     taille = models.CharField(max_length=255, blank=True)
     colors = models.CharField(max_length=255)
+    TYPE_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female')
+    )
+    type = models.CharField(max_length=1, choices=TYPE_CHOICES, blank=True)
+    
 
     def __str__(self):
         return (self.title)
@@ -86,6 +92,7 @@ class Clothes(Product):
     
     class Meta:
         db_table = 'ShopApp_clothes'
+
 
 
 class Customer(models.Model):
