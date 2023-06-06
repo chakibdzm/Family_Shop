@@ -215,6 +215,8 @@ class Favorite(models.Model):
         return self.product.description
     def prod_quantity(self):
         return self.product.quantity
+    def alt_image(self):
+        return self.product.alt_image
 
 class PanierItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -241,7 +243,8 @@ class PanierItem(models.Model):
 
     def __str__(self):
         return f'{self.quantity} x {self.product.title}'
-    
+    def alt_image(self):
+        return self.product.alt_image
     
 
 
@@ -252,9 +255,12 @@ class Orders(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     points_incremented = models.BooleanField(default=False)
     address=models.CharField(max_length=100,default='')
-
+    
     def total(self):
-        return sum(item.subtotal() for item in self.items.all())    
+        return sum(item.subtotal() for item in self.items.all())   
+
+    def alt_image(self):
+        return (item.alt_image() for item in self.items.all())  
 
     def __str__(self) -> str:
         return str(self.user) 
