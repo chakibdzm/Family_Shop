@@ -222,6 +222,7 @@ class PanierItem(models.Model):
     quantity = models.IntegerField()
     price = models.DecimalField(max_digits=6, decimal_places=2)
     date_added = models.DateTimeField(default=timezone.now)
+    
 
 
     def subtotal(self):
@@ -250,6 +251,7 @@ class Orders(models.Model):
     items = models.ManyToManyField('PanierItem')
     created_at = models.DateTimeField(default=timezone.now)
     points_incremented = models.BooleanField(default=False)
+    address=models.CharField(max_length=100,default='')
 
     def total(self):
         return sum(item.subtotal() for item in self.items.all())    
