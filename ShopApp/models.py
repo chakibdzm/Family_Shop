@@ -50,8 +50,14 @@ class Product(models.Model):
     alt_image = models.CharField(max_length=255)
     collection = models.ForeignKey(Sub_collection, on_delete=models.CASCADE, related_name='products', null=True)
     is_archived = models.BooleanField(default=False)
-    taille = models.CharField(max_length=255)
-    colors = models.CharField(max_length=255)
+    taille = models.CharField(max_length=255, blank=True)
+    colors = models.CharField(max_length=255, blank=True)
+    TYPE_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female')
+    )
+    type = models.CharField(max_length=1, choices=TYPE_CHOICES, blank=True)
+    
 
     def __str__(self):
         return (self.title)
@@ -79,13 +85,14 @@ class Clothes(Product):
         ('F', 'Female'),
         ('K', 'Kids'),
     )
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
 
     def get_collection_name(self):
         return self.collection.title
     
     class Meta:
         db_table = 'ShopApp_clothes'
+
 
 
 class Customer(models.Model):

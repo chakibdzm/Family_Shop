@@ -16,6 +16,7 @@ drf-nested-routers = "*"
 pillow = "*"
 django-baton = "*"
 django-push-notifications = "*"
+pusher-push-notifications = "*"
 
 [dev-packages]
 

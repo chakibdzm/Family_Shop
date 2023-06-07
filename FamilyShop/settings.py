@@ -117,6 +117,8 @@ PUSH_NOTIFICATIONS_SETTINGS = {
     # firebase notification push api handler
 }
 
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
